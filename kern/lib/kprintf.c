@@ -208,3 +208,8 @@ badassert(const char *expr, const char *file, int line, const char *func)
 	panic("Assertion failed: %s, at %s:%d (%s)\n",
 	      expr, file, line, func);
 }
+
+void 
+setDebug(){
+	dbflags = 1;
+}

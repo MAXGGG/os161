@@ -269,7 +269,7 @@ cmd_dth(int nargs, char **args)
 	(void)nargs;
 	(void)args;
 
-	dbflags = 1;
+	setDebug();
 
 	return 0;
 }
