@@ -183,7 +183,7 @@ void badassert(const char *expr, const char *file, int line, const char *func);
 
 void kgets(char *buf, size_t maxbuflen);
 
-void setDebug();
+void setDebug(void);
 
 void kprintf_bootstrap(void);
 
