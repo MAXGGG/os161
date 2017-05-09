@@ -211,7 +211,7 @@ badassert(const char *expr, const char *file, int line, const char *func)
 
 void 
 setDebug(){
-	dbflags = 0x0001;
+	dbflags = 0x1111;
 }
 
 
