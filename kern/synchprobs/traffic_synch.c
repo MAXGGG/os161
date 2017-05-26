@@ -49,6 +49,8 @@ int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
                                     {0,1,2,3,6,7,-1},
                                     {1,3,4,6,7,-1,-1}};
 
+int get_index(Direction, Direction);
+
 /* 
  * The simulation driver will call this function once before starting
  * the simulation
@@ -98,18 +100,18 @@ intersection_sync_cleanup(void)
 
 int
 get_index(Direction origin, Direction destination){ 
-  if((origin==north&&destination==west) return 0;
-  if((origin==north&&destination==south) return 1;
-  if((origin==north&&destination==east) return 2;
-  if((origin==west &&destination==north) return 3;
-  if((origin==west &&destination==east) return 4;
-  if((origin==west &&destination==south) return 5;
-  if((origin==south&&destination==west) return 6;
-  if((origin==south&&destination==north) return 7;
-  if((origin==south&&destination==east) return 8;
-  if((origin==east &&destination==south) return 9;
-  if((origin==east &&destination==west) return 10;
-  if((origin==east &&destination==north) return 11;
+  if(origin==north&&destination==west) return 0;
+  if(origin==north&&destination==south) return 1;
+  if(origin==north&&destination==east) return 2;
+  if(origin==west &&destination==north) return 3;
+  if(origin==west &&destination==east) return 4;
+  if(origin==west &&destination==south) return 5;
+  if(origin==south&&destination==west) return 6;
+  if(origin==south&&destination==north) return 7;
+  if(origin==south&&destination==east) return 8;
+  if(origin==east &&destination==south) return 9;
+  if(origin==east &&destination==west) return 10;
+  if(origin==east &&destination==north) return 11;
 
 }
 
