@@ -150,6 +150,7 @@ enter_intersection(int index){
 void
 exit_intersection(int index){
   lock_acquire(cv_lock);
+  lock_acquire(available_lock):
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]--;
@@ -158,6 +159,7 @@ exit_intersection(int index){
   max++;
   cv_broadcast(available_lock_cv, available_lock);
   cv_broadcast(cv,cv_lock);
+  lock_release(available_lock):
   lock_release(cv_lock);
 }
 
