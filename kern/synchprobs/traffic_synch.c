@@ -50,6 +50,9 @@ int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
                                     {1,3,4,6,7,-1,-1}};
 
 int get_index(Direction, Direction);
+void wait_for_available(int);
+void enable_routes(int);
+void disable_routes(int);
 
 /* 
  * The simulation driver will call this function once before starting
@@ -112,10 +115,10 @@ get_index(Direction origin, Direction destination){
   if(origin==east &&destination==south) return 9;
   if(origin==east &&destination==west) return 10;
   if(origin==east &&destination==north) return 11;
-
+  return -1;
 }
 
-bool
+void
 wait_for_available(int index){
   lock_acquire(cv_lock);
   while(available[index]>0)
@@ -168,6 +171,7 @@ intersection_before_entry(Direction origin, Direction destination)
   KASSERT(cv != NULL);
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
+  KASSERT(index != -1);
   wait_for_available(index);
   disable_routes(index);
   
@@ -192,6 +196,7 @@ intersection_after_exit(Direction origin, Direction destination)
   KASSERT(cv != NULL);
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
+  KASSERT(index != -1);
   enable_routes(index);
 }
 
