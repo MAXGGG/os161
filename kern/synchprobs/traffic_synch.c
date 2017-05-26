@@ -21,7 +21,19 @@
 /*
  * replace this with declarations of any synchronization and other variables you need here
  */
-static struct semaphore *intersectionSem;
+// static struct semaphore *intersectionSem;
+static struct lock *cv_lock;
+static struct lock *cv;
+
+
+/*
+ *arrary for availabilities 
+ *0:N-W, 1:N-S, 2:N-E
+ *3:W-N, 4:W-E, 5:W-S
+ *6:S-W, 7:S-N, 8:S-E
+ *9:E-S, 10:E-W, 11:E-N
+ */
+int volatile available[12] = {0};
 
 
 /* 
@@ -36,10 +48,15 @@ intersection_sync_init(void)
 {
   /* replace this default implementation with your own implementation */
 
-  intersectionSem = sem_create("intersectionSem",1);
-  if (intersectionSem == NULL) {
-    panic("could not create intersection semaphore");
+  cv_lock = lock_create("cv_lock");
+  cv = lock_create("cv");
+  if (cv_lock == NULL) {
+    panic("could not create cv lock");
   }
+  if (cv == NULL) {
+    panic("could not create cv");
+  }
+
   return;
 }
 
@@ -54,10 +71,27 @@ void
 intersection_sync_cleanup(void)
 {
   /* replace this default implementation with your own implementation */
-  KASSERT(intersectionSem != NULL);
-  sem_destroy(intersectionSem);
+  KASSERT(cv_lock != NULL);
+  KASSERT(cv != NULL);
+  lock_destroy(cv_lock);
+  cv_destroy(cv);
 }
 
+bool
+is_available(Direction origin, Direction destination)
+{ 
+  bool available = 1;
+  if((origin==south&&destination==north){
+    if(s==0&&n==0){
+       available = 0;
+     }
+  }else if(origin==south&&destination==west)){
+     if(s==0&&n==0){
+       available = 0;
+     }
+  }
+
+}
 
 /*
  * The simulation driver will call this function each time a vehicle
@@ -78,8 +112,9 @@ intersection_before_entry(Direction origin, Direction destination)
   /* replace this default implementation with your own implementation */
   (void)origin;  /* avoid compiler complaint about unused parameter */
   (void)destination; /* avoid compiler complaint about unused parameter */
-  KASSERT(intersectionSem != NULL);
-  P(intersectionSem);
+  KASSERT(cv_lock != NULL);
+  KASSERT(cv != NULL);
+  
 }
 
 
