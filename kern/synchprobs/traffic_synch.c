@@ -124,13 +124,11 @@ wait_for_available(int index){
   lock_acquire(cv_lock);
   while(available[0]>0)
     cv_wait(cv, cv_lock);
-  lock_release(cv_lock);
 }
 
 void
 disable_routes(int index){
   (void)index;
-  lock_acquire(cv_lock);
   // for(int i=0;i<7;++i){
   //     if(disable_list[index][i]!=-1){
   //       available[disable_list[index][i]]++;
