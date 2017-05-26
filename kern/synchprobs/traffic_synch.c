@@ -159,7 +159,7 @@ exit_intersection(int index){
   max++;
   cv_broadcast(available_lock_cv, available_lock);
   cv_broadcast(cv,cv_lock);
-  lock_release(available_lock):
+  lock_release(available_lock);
   lock_release(cv_lock);
 }
 
