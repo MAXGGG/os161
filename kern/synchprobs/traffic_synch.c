@@ -24,6 +24,7 @@
 // static struct semaphore *intersectionSem;
 static struct lock *cv_lock;
 static struct lock *cv;
+static struct lock *available_lock;
 
 
 /*
@@ -35,6 +36,18 @@ static struct lock *cv;
  */
 int volatile available[12] = {0};
 
+int volatile disable_list[12][7] = [[4,6,7,9,10,-1,-1],
+                                    [3,4,5,6,9,10,-1],
+                                    [3,4,6,7,8,9,10],
+                                    [1,2,6,7,9,10,11],
+                                    [1,2,6,7,8,9,-1],
+                                    [1,2,7,9,10,-1,-1],
+                                    [0,1,2,3,4,9,10],
+                                    [2,3,4,9,10,-1,-1],
+                                    [1,2,3,4,10,-1,-1],
+                                    [1,2,3,4,5,6,7],
+                                    [0,1,2,3,6,7,-1],
+                                    [1,3,4,6,7,-1,-1]];
 
 /* 
  * The simulation driver will call this function once before starting
@@ -49,7 +62,11 @@ intersection_sync_init(void)
   /* replace this default implementation with your own implementation */
 
   cv_lock = lock_create("cv_lock");
-  cv = lock_create("cv");
+  available_lock = lock_create("available_lock");
+  cv = cv_create("cv");
+  if (available_lock == NULL) {
+    panic("could not create available_lock lock");
+  }
   if (cv_lock == NULL) {
     panic("could not create cv lock");
   }
@@ -73,24 +90,60 @@ intersection_sync_cleanup(void)
   /* replace this default implementation with your own implementation */
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
+  KASSERT(available_lock != NULL);
   lock_destroy(cv_lock);
+  lock_destroy(available_lock);
   cv_destroy(cv);
 }
 
-bool
-is_available(Direction origin, Direction destination)
-{ 
-  bool available = 1;
-  if((origin==south&&destination==north){
-    if(s==0&&n==0){
-       available = 0;
-     }
-  }else if(origin==south&&destination==west)){
-     if(s==0&&n==0){
-       available = 0;
-     }
-  }
+int
+get_index(Direction origin, Direction destination){ 
+  if((origin==north&&destination==west) return 0;
+  if((origin==north&&destination==south) return 1;
+  if((origin==north&&destination==east) return 2;
+  if((origin==west &&destination==north) return 3;
+  if((origin==west &&destination==east) return 4;
+  if((origin==west &&destination==south) return 5;
+  if((origin==south&&destination==west) return 6;
+  if((origin==south&&destination==north) return 7;
+  if((origin==south&&destination==east) return 8;
+  if((origin==east &&destination==south) return 9;
+  if((origin==east &&destination==west) return 10;
+  if((origin==east &&destination==north) return 11;
 
+}
+
+bool
+wait_for_available(int index){
+  lock_acquire(cv_lock);
+  while(available[index]>0)
+    cv_wait(cv, cv_lock);
+  lock_release(cv_lock);
+}
+
+void
+disable_routes(int index){
+  lock_acquire(available_lock);
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]++;
+      }
+  }
+  lock_release(available_lock);
+}
+
+void
+enable_routes(int index){
+  lock_acquire(available_lock);
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]--;
+      }
+  }
+  lock_release(available_lock);
+  lock_acquire(cv_lock);
+  cv_broadcast(cv,cv_lock);
+  lock_release(cv_lock);
 }
 
 /*
@@ -109,11 +162,12 @@ is_available(Direction origin, Direction destination)
 void
 intersection_before_entry(Direction origin, Direction destination) 
 {
-  /* replace this default implementation with your own implementation */
-  (void)origin;  /* avoid compiler complaint about unused parameter */
-  (void)destination; /* avoid compiler complaint about unused parameter */
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
+  KASSERT(available_lock != NULL);
+  int index = get_index(origin, destination);
+  wait_for_available(index);
+  disable_routes(index);
   
 }
 
@@ -132,9 +186,9 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 intersection_after_exit(Direction origin, Direction destination) 
 {
-  /* replace this default implementation with your own implementation */
-  (void)origin;  /* avoid compiler complaint about unused parameter */
-  (void)destination; /* avoid compiler complaint about unused parameter */
-  KASSERT(intersectionSem != NULL);
-  V(intersectionSem);
+  KASSERT(cv_lock != NULL);
+  KASSERT(cv != NULL);
+  KASSERT(available_lock != NULL);
+  int index = get_index(origin, destination);
+  enable_routes(index);
 }
