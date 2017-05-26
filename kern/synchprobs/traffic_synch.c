@@ -23,7 +23,7 @@
  */
 // static struct semaphore *intersectionSem;
 static struct lock *cv_lock;
-static struct lock *cv;
+static struct cv *cv;
 static struct lock *available_lock;
 
 
@@ -36,18 +36,18 @@ static struct lock *available_lock;
  */
 int volatile available[12] = {0};
 
-int volatile disable_list[12][7] = [[4,6,7,9,10,-1,-1],
-                                    [3,4,5,6,9,10,-1],
-                                    [3,4,6,7,8,9,10],
-                                    [1,2,6,7,9,10,11],
-                                    [1,2,6,7,8,9,-1],
-                                    [1,2,7,9,10,-1,-1],
-                                    [0,1,2,3,4,9,10],
-                                    [2,3,4,9,10,-1,-1],
-                                    [1,2,3,4,10,-1,-1],
-                                    [1,2,3,4,5,6,7],
-                                    [0,1,2,3,6,7,-1],
-                                    [1,3,4,6,7,-1,-1]];
+int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
+                                    {3,4,5,6,9,10,-1},
+                                    {3,4,6,7,8,9,10},
+                                    {1,2,6,7,9,10,11},
+                                    {1,2,6,7,8,9,-1},
+                                    {1,2,7,9,10,-1,-1},
+                                    {0,1,2,3,4,9,10},
+                                    {2,3,4,9,10,-1,-1},
+                                    {1,2,3,4,10,-1,-1},
+                                    {1,2,3,4,5,6,7},
+                                    {0,1,2,3,6,7,-1},
+                                    {1,3,4,6,7,-1,-1}};
 
 /* 
  * The simulation driver will call this function once before starting
@@ -192,3 +192,4 @@ intersection_after_exit(Direction origin, Direction destination)
   int index = get_index(origin, destination);
   enable_routes(index);
 }
+
