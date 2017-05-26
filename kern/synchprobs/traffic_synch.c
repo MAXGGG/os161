@@ -25,7 +25,7 @@
 static struct lock *cv_lock;
 static struct cv *cv;
 static struct lock *available_lock;
-
+static struct cv *available_lock_cv;
 
 /*
  *arrary for availabilities 
@@ -34,6 +34,8 @@ static struct lock *available_lock;
  *6:S-W, 7:S-N, 8:S-E
  *9:E-S, 10:E-W, 11:E-N
  */
+
+int volatile max = 6;
 int volatile available[12] = {0};
 
 int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
@@ -43,16 +45,16 @@ int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
                                     {1,2,6,7,8,9,-1},
                                     {1,2,7,9,10,-1,-1},
                                     {0,1,2,3,4,9,10},
-                                    {2,3,4,9,10,-1,-1},
+                                    {2,3,4,9,10,11,-1},
                                     {1,2,3,4,10,-1,-1},
                                     {1,2,3,4,5,6,7},
                                     {0,1,2,3,6,7,-1},
                                     {1,3,4,6,7,-1,-1}};
 
 int get_index(Direction, Direction);
-void wait_for_available(int);
-void enable_routes(int);
-void disable_routes(int);
+void enter_intersection(int);
+void exit_intersection(int);
+void wait_for_max(void);
 
 /* 
  * The simulation driver will call this function once before starting
@@ -68,9 +70,13 @@ intersection_sync_init(void)
 
   cv_lock = lock_create("cv_lock");
   available_lock = lock_create("available_lock");
+  available_lock_cv = lock_create("available_lock_cv");
   cv = cv_create("cv");
   if (available_lock == NULL) {
     panic("could not create available_lock lock");
+  }
+  if (available_lock_cv == NULL) {
+    panic("could not create available_lock cv");
   }
   if (cv_lock == NULL) {
     panic("could not create cv lock");
@@ -96,9 +102,11 @@ intersection_sync_cleanup(void)
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
   KASSERT(available_lock != NULL);
+  KASSERT(available_lock_cv != NULL);
   lock_destroy(cv_lock);
   lock_destroy(available_lock);
   cv_destroy(cv);
+  cv_destroy(available_lock_cv);
 }
 
 int
@@ -118,15 +126,19 @@ get_index(Direction origin, Direction destination){
   return -1;
 }
 
-void
-wait_for_available(int index){
-  lock_acquire(cv_lock);
-  while(available[index]>0)
-    cv_wait(cv, cv_lock);
+void wait_for_max(void){
+  lock_acquire(available_lock);
+  while(max==0)
+    cv_wait(available_lock_cv);
+  lock_release(available_lock);
 }
 
 void
-disable_routes(int index){
+enter_intersection(int index){
+  lock_acquire(cv_lock);
+  while(available[index]>0)
+    cv_wait(cv, cv_lock);
+  max--;
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]++;
@@ -136,18 +148,17 @@ disable_routes(int index){
 }
 
 void
-enable_routes(int index){
+exit_intersection(int index){
   lock_acquire(cv_lock);
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]--;
       }
   }
+  max++;
+  cv_broadcast(available_lock_cv, available_lock);
   cv_broadcast(cv,cv_lock);
   lock_release(cv_lock);
-  // lock_acquire(cv_lock);
-  // cv_broadcast(cv,cv_lock);
-  // lock_release(cv_lock);
 }
 
 /*
@@ -171,8 +182,8 @@ intersection_before_entry(Direction origin, Direction destination)
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
-  wait_for_available(index);
-  disable_routes(index);
+  wait_for_max();
+  enter_intersection(index);
   
 }
 
@@ -196,6 +207,6 @@ intersection_after_exit(Direction origin, Direction destination)
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
-  enable_routes(index);
+  exit_intersection(index);
 }
 
