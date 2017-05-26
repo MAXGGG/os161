@@ -120,34 +120,29 @@ get_index(Direction origin, Direction destination){
 
 void
 wait_for_available(int index){
-  (void)index;
   lock_acquire(cv_lock);
-  while(available[0]>0)
+  while(available[index]>0)
     cv_wait(cv, cv_lock);
 }
 
 void
 disable_routes(int index){
-  (void)index;
-  // for(int i=0;i<7;++i){
-  //     if(disable_list[index][i]!=-1){
-  //       available[disable_list[index][i]]++;
-  //     }
-  // }
-  available[0] = 1;
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]++;
+      }
+  }
   lock_release(cv_lock);
 }
 
 void
 enable_routes(int index){
-  (void)index;
   lock_acquire(cv_lock);
-  // for(int i=0;i<7;++i){
-  //     if(disable_list[index][i]!=-1){
-  //       available[disable_list[index][i]]--;
-  //     }
-  // }
-  available[0] = 0;
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]--;
+      }
+  }
   cv_broadcast(cv,cv_lock);
   lock_release(cv_lock);
   // lock_acquire(cv_lock);
