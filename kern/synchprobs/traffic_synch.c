@@ -36,25 +36,30 @@ static struct cv *available_lock_cv;
  */
 
 int volatile max = 6;
-int volatile available[12] = {0};
+int volatile allowed[12] = {0};
+int volatile state = 0;
 
-int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
-                                    {3,4,5,6,9,10,-1},
-                                    {3,4,6,7,8,9,10},
-                                    {1,2,6,7,9,10,11},
-                                    {1,2,6,7,8,9,-1},
-                                    {1,2,7,9,10,-1,-1},
-                                    {0,1,2,3,4,9,10},
-                                    {2,3,4,9,10,11,-1},
-                                    {1,2,3,4,10,-1,-1},
-                                    {1,2,3,4,5,6,7},
-                                    {0,1,2,3,6,7,-1},
-                                    {1,3,4,6,7,-1,-1}};
+// int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
+//                                     {3,4,5,6,9,10,-1},
+//                                     {3,4,6,7,8,9,10},
+//                                     {1,2,6,7,9,10,11},
+//                                     {1,2,6,7,8,9,-1},
+//                                     {1,2,7,9,10,-1,-1},
+//                                     {0,1,2,3,4,9,10},
+//                                     {2,3,4,9,10,11,-1},
+//                                     {1,2,3,4,10,-1,-1},
+//                                     {1,2,3,4,5,6,7},
+//                                     {0,1,2,3,6,7,-1},
+//                                     {1,3,4,6,7,-1,-1}};
+int states[4][12] = {{1,1,1,0,0,0,0,0,0,0,0,0},
+                     {0,0,0,1,1,1,0,0,0,0,0,0},
+                     {0,0,0,0,0,0,1,1,1,0,0,0},
+                     {0,0,0,0,0,0,0,0,0,1,1,1}};
 
 int get_index(Direction, Direction);
 void enter_intersection(int);
 void exit_intersection(int);
-void wait_for_max(void);
+// void wait_for_max(void);
 
 /* 
  * The simulation driver will call this function once before starting
@@ -126,40 +131,34 @@ get_index(Direction origin, Direction destination){
   return -1;
 }
 
-void wait_for_max(void){
-  lock_acquire(available_lock);
-  while(max==0)
-    cv_wait(available_lock_cv, available_lock);
-  lock_release(available_lock);
-}
+// void wait_for_max(void){
+//   lock_acquire(available_lock);
+//   while(max==0)
+//     cv_wait(available_lock_cv, available_lock);
+//   lock_release(available_lock);
+// }
 
 void
 enter_intersection(int index){
   lock_acquire(cv_lock);
-  while(available[index]>0)
+  while(states[state][index]==0)
     cv_wait(cv, cv_lock);
   max--;
-  for(int i=0;i<7;++i){
-      if(disable_list[index][i]!=-1){
-        available[disable_list[index][i]]++;
-      }
-  }
   lock_release(cv_lock);
 }
 
 void
 exit_intersection(int index){
   lock_acquire(cv_lock);
-  lock_acquire(available_lock);
-  for(int i=0;i<7;++i){
-      if(disable_list[index][i]!=-1){
-        available[disable_list[index][i]]--;
-      }
+  if(max<=0){
+    max = 6;
+    if(state<3){
+      state++;
+    }else{
+      state=0;
+    }
   }
-  max++;
-  cv_signal(available_lock_cv, available_lock);
   cv_broadcast(cv,cv_lock);
-  lock_release(available_lock);
   lock_release(cv_lock);
 }
 
@@ -184,7 +183,6 @@ intersection_before_entry(Direction origin, Direction destination)
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
-  wait_for_max();
   enter_intersection(index);
   
 }
