@@ -129,7 +129,7 @@ get_index(Direction origin, Direction destination){
 void wait_for_max(void){
   lock_acquire(available_lock);
   while(max==0)
-    cv_wait(available_lock_cv);
+    cv_wait(available_lock_cv, available_lock);
   lock_release(available_lock);
 }
 
