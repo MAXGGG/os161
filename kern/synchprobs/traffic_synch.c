@@ -128,27 +128,28 @@ wait_for_available(int index){
 
 void
 disable_routes(int index){
-  lock_acquire(available_lock);
+  lock_acquire(cv_lock);
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]++;
       }
   }
-  lock_release(available_lock);
+  lock_release(cv_lock);
 }
 
 void
 enable_routes(int index){
-  lock_acquire(available_lock);
+  lock_acquire(cv_lock);
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]--;
       }
   }
-  lock_release(available_lock);
-  lock_acquire(cv_lock);
   cv_broadcast(cv,cv_lock);
   lock_release(cv_lock);
+  // lock_acquire(cv_lock);
+  // cv_broadcast(cv,cv_lock);
+  // lock_release(cv_lock);
 }
 
 /*
