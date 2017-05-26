@@ -70,7 +70,7 @@ intersection_sync_init(void)
 
   cv_lock = lock_create("cv_lock");
   available_lock = lock_create("available_lock");
-  available_lock_cv = lock_create("available_lock_cv");
+  available_lock_cv = cv_create("available_lock_cv");
   cv = cv_create("cv");
   if (available_lock == NULL) {
     panic("could not create available_lock lock");
