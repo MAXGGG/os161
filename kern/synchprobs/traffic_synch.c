@@ -150,7 +150,7 @@ enter_intersection(int index){
 void
 exit_intersection(int index){
   lock_acquire(cv_lock);
-  lock_acquire(available_lock):
+  lock_acquire(available_lock);
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]--;
