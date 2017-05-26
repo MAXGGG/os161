@@ -35,7 +35,7 @@ static struct cv *available_lock_cv;
  *9:E-S, 10:E-W, 11:E-N
  */
 
-int volatile max = 4;
+int volatile max = 2;
 int volatile available[12] = {0};
 
 int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
