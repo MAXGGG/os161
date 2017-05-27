@@ -149,6 +149,7 @@ enter_intersection(int index){
 
 void
 exit_intersection(int index){
+  (void)index;
   lock_acquire(cv_lock);
   if(max<=0){
     max = 6;
