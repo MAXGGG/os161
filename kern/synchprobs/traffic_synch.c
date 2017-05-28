@@ -90,8 +90,6 @@ intersection_sync_cleanup(void)
   /* replace this default implementation with your own implementation */
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
-  KASSERT(available_lock != NULL);
-  KASSERT(available_lock_cv != NULL);
   lock_destroy(cv_lock);
   cv_destroy(cv);
 }
