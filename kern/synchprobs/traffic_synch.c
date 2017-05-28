@@ -185,7 +185,7 @@ exit_intersection(Direction d){
     int max = 0;
     int next = 0;
     for(int i=0;i<4;++i){
-      if(record[i]>max){
+      if(record[i]>max&&all_directions[i]!=d){
         max = record[i];
         next = i;
       }
