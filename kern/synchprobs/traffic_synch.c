@@ -145,6 +145,7 @@ get_index(Direction origin, Direction destination){
 
 void
 enter_intersection(Direction d){
+  (void) d;
   lock_acquire(cv_lock);
   // while(d!=all_directions[state]){
   //   wait_count++;
