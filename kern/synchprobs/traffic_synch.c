@@ -151,7 +151,7 @@ enter_intersection(Direction d){
     cv_wait(cv, cv_lock);
     wait_count--;
   }
-  car_in_intersection++:
+  car_in_intersection++;
   lock_release(cv_lock);
 }
 
