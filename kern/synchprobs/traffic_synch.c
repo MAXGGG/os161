@@ -35,9 +35,14 @@ static struct cv *available_lock_cv;
  *9:E-S, 10:E-W, 11:E-N
  */
 
-int volatile max = 3;
+int volatile max = 4;
 int volatile allowed[12] = {0};
 int volatile state = 0;
+Direction volatile all_directions = {north, south, east, west};
+int current_direction = 0;
+
+int wait_count = 0;
+int car_in_intersection = 0;
 
 // int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
 //                                     {3,4,5,6,9,10,-1},
@@ -57,7 +62,7 @@ int states[4][12] = {{1,1,1,0,0,0,0,0,0,0,0,0},
                      {0,0,0,0,0,0,0,0,0,1,1,1}};
 
 int get_index(Direction, Direction);
-void enter_intersection(int);
+void enter_intersection(Direction);
 void exit_intersection(int);
 // void wait_for_max(void);
 
@@ -139,11 +144,14 @@ get_index(Direction origin, Direction destination){
 // }
 
 void
-enter_intersection(int index){
+enter_intersection(Direction d){
   lock_acquire(cv_lock);
-  while(states[state][index]==0)
+  while(d!=all_directions[state]){
+    wait_count++;
     cv_wait(cv, cv_lock);
-  max--;
+    wait_count--;
+  }
+  car_in_intersection++:
   lock_release(cv_lock);
 }
 
@@ -151,8 +159,8 @@ void
 exit_intersection(int index){
   (void)index;
   lock_acquire(cv_lock);
-  if(max<=0){
-    max = 6;
+  car_in_intersection--;
+  if(car_in_intersection==0&&wait_count>3){
     if(state<3){
       state++;
     }else{
