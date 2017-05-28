@@ -24,8 +24,6 @@
 // static struct semaphore *intersectionSem;
 static struct lock *cv_lock;
 static struct cv *cv;
-static struct lock *available_lock;
-static struct cv *available_lock_cv;
 
 /*
  *arrary for availabilities 
@@ -35,37 +33,25 @@ static struct cv *available_lock_cv;
  *9:E-S, 10:E-W, 11:E-N
  */
 
-int volatile max = 4;
-int volatile allowed[12] = {0};
-int volatile state = 0;
-Direction volatile all_directions[4] = {north, south, east, west};
-int record[4] = {0};
-int current_direction = 0;
+int volatile max = 6;
+int volatile available[12] = {0};
 
-int volatile wait_count = 0;
-int car_in_intersection = 0;
-
-// int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
-//                                     {3,4,5,6,9,10,-1},
-//                                     {3,4,6,7,8,9,10},
-//                                     {1,2,6,7,9,10,11},
-//                                     {1,2,6,7,8,9,-1},
-//                                     {1,2,7,9,10,-1,-1},
-//                                     {0,1,2,3,4,9,10},
-//                                     {2,3,4,9,10,11,-1},
-//                                     {1,2,3,4,10,-1,-1},
-//                                     {1,2,3,4,5,6,7},
-//                                     {0,1,2,3,6,7,-1},
-//                                     {1,3,4,6,7,-1,-1}};
-int states[4][12] = {{1,1,1,0,0,0,0,0,0,0,0,0},
-                     {0,0,0,1,1,1,0,0,0,0,0,0},
-                     {0,0,0,0,0,0,1,1,1,0,0,0},
-                     {0,0,0,0,0,0,0,0,0,1,1,1}};
+int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
+                                    {3,4,5,6,9,10,-1},
+                                    {3,4,6,7,8,9,10},
+                                    {1,2,6,7,9,10,11},
+                                    {1,2,6,7,8,9,-1},
+                                    {1,2,7,9,10,-1,-1},
+                                    {0,1,2,3,4,9,10},
+                                    {2,3,4,9,10,11,-1},
+                                    {1,2,3,4,10,-1,-1},
+                                    {1,2,3,4,5,6,7},
+                                    {0,1,2,3,6,7,-1},
+                                    {1,3,4,6,7,-1,-1}};
 
 int get_index(Direction, Direction);
-void enter_intersection(Direction);
-void exit_intersection(Direction);
-// void wait_for_max(void);
+void enter_intersection(int);
+void exit_intersection(int);
 
 /* 
  * The simulation driver will call this function once before starting
@@ -80,15 +66,7 @@ intersection_sync_init(void)
   /* replace this default implementation with your own implementation */
 
   cv_lock = lock_create("cv_lock");
-  available_lock = lock_create("available_lock");
-  available_lock_cv = cv_create("available_lock_cv");
   cv = cv_create("cv");
-  if (available_lock == NULL) {
-    panic("could not create available_lock lock");
-  }
-  if (available_lock_cv == NULL) {
-    panic("could not create available_lock cv");
-  }
   if (cv_lock == NULL) {
     panic("could not create cv lock");
   }
@@ -137,59 +115,25 @@ get_index(Direction origin, Direction destination){
   return -1;
 }
 
-// void wait_for_max(void){
-//   lock_acquire(available_lock);
-//   while(max==0)
-//     cv_wait(available_lock_cv, available_lock);
-//   lock_release(available_lock);
-// }
 
 void
-enter_intersection(Direction d){
+enter_intersection(int index){
   lock_acquire(cv_lock);
-  while(d!=all_directions[state]){
-    wait_count++;
-    if(d==north){
-      record[0]++;
-    }else if(d == south){
-      record[1]++;
-    }else if(d == east){
-      record[2]++;
-    }
-    else if(d == west){
-      record[3]++;
-    }
-    cv_wait(cv, cv_lock);
-    if(d==north){
-      record[0]--;
-    }else if(d == south){
-      record[1]--;
-    }else if(d == east){
-      record[2]--;
-    }
-    else if(d == west){
-      record[3]--;
-    }
-    wait_count--;
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]++;
+      }
   }
-  // car_in_intersection++;
   lock_release(cv_lock);
 }
 
 void
-exit_intersection(Direction d){
+exit_intersection(int index){
   lock_acquire(cv_lock);
-  // car_in_intersection--;
-  if(car_in_intersection==0){
-    int max = 0;
-    int next = 0;
-    for(int i=0;i<4;++i){
-      if(record[i]>max&&all_directions[i]!=d){
-        max = record[i];
-        next = i;
+  for(int i=0;i<7;++i){
+      if(disable_list[index][i]!=-1){
+        available[disable_list[index][i]]--;
       }
-    }
-    state = next;
   }
   cv_broadcast(cv,cv_lock);
   lock_release(cv_lock);
@@ -216,7 +160,7 @@ intersection_before_entry(Direction origin, Direction destination)
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
-  enter_intersection(origin);
+  enter_intersection(index);
   
 }
 
