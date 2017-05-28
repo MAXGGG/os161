@@ -155,7 +155,6 @@ intersection_before_entry(Direction origin, Direction destination)
 {
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
-  KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
   enter_intersection(index);
@@ -179,7 +178,6 @@ intersection_after_exit(Direction origin, Direction destination)
 {
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
-  KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
   exit_intersection(index);
