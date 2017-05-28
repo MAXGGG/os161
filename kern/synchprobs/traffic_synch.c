@@ -38,7 +38,7 @@ static struct cv *available_lock_cv;
 int volatile max = 4;
 int volatile allowed[12] = {0};
 int volatile state = 0;
-Direction volatile all_directions = {north, south, east, west};
+Direction volatile all_directions[4] = {north, south, east, west};
 int current_direction = 0;
 
 int wait_count = 0;
