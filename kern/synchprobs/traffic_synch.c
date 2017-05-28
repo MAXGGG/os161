@@ -161,6 +161,7 @@ exit_intersection(int index){
   lock_acquire(cv_lock);
   // car_in_intersection--;
   if(car_in_intersection==0){
+    panic("dsadassa");
     if(state<3){
       state++;
     }else{
