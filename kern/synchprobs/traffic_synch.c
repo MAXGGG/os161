@@ -151,23 +151,23 @@ enter_intersection(Direction d){
     wait_count++;
     if(d==north){
       record[0]++;
-    }else if(d = south){
+    }else if(d == south){
       record[1]++;
-    }else if(d = east){
+    }else if(d == east){
       record[2]++;
     }
-    else if(d = west){
+    else if(d == west){
       record[3]++;
     }
     cv_wait(cv, cv_lock);
     if(d==north){
       record[0]--;
-    }else if(d = south){
+    }else if(d == south){
       record[1]--;
-    }else if(d = east){
+    }else if(d == east){
       record[2]--;
     }
-    else if(d = west){
+    else if(d == west){
       record[3]--;
     }
     wait_count--;
