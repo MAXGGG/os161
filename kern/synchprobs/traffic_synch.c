@@ -115,6 +115,9 @@ get_index(Direction origin, Direction destination){
 void
 enter_intersection(int index){
   lock_acquire(cv_lock);
+  while(available[index]>0){
+    cv_wait(cv, cv_lock);
+  }
   for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]++;
