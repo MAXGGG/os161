@@ -93,9 +93,7 @@ intersection_sync_cleanup(void)
   KASSERT(available_lock != NULL);
   KASSERT(available_lock_cv != NULL);
   lock_destroy(cv_lock);
-  lock_destroy(available_lock);
   cv_destroy(cv);
-  cv_destroy(available_lock_cv);
 }
 
 int
