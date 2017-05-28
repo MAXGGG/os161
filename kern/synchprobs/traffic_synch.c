@@ -41,8 +41,8 @@ int volatile state = 0;
 Direction volatile all_directions[4] = {north, south, east, west};
 int current_direction = 0;
 
-int wait_count = 0;
-int car_in_intersection = 0;
+int volatile wait_count = 0;
+int volatile car_in_intersection = 0;
 
 // int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
 //                                     {3,4,5,6,9,10,-1},
