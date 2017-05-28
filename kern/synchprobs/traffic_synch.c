@@ -160,7 +160,6 @@ exit_intersection(int index){
   (void)index;
   lock_acquire(cv_lock);
   // car_in_intersection--;
-  car_in_intersection = 0;
   if(car_in_intersection==0){
     if(state<3){
       state++;
