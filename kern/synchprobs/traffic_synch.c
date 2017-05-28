@@ -39,6 +39,7 @@ int volatile max = 4;
 int volatile allowed[12] = {0};
 int volatile state = 0;
 Direction volatile all_directions[4] = {north, south, east, west};
+int record[4] = {0};
 int current_direction = 0;
 
 int volatile wait_count = 0;
@@ -63,7 +64,7 @@ int states[4][12] = {{1,1,1,0,0,0,0,0,0,0,0,0},
 
 int get_index(Direction, Direction);
 void enter_intersection(Direction);
-void exit_intersection(int);
+void exit_intersection(Direction);
 // void wait_for_max(void);
 
 /* 
@@ -148,7 +149,27 @@ enter_intersection(Direction d){
   lock_acquire(cv_lock);
   while(d!=all_directions[state]){
     wait_count++;
+    if(d==north){
+      record[0]++;
+    }else if(d = south){
+      record[1]++;
+    }else if(d = east){
+      record[2]++:
+    }
+    else if(d = west){
+      record[3]++:
+    }
     cv_wait(cv, cv_lock);
+    if(d==north){
+      record[0]--;
+    }else if(d = south){
+      record[1]--;
+    }else if(d = east){
+      record[2]--:
+    }
+    else if(d = west){
+      record[3]--:
+    }
     wait_count--;
   }
   // car_in_intersection++;
@@ -156,17 +177,20 @@ enter_intersection(Direction d){
 }
 
 void
-exit_intersection(int index){
+exit_intersection(Direction d){
   (void)index;
   lock_acquire(cv_lock);
   // car_in_intersection--;
-  if(car_in_intersection==1){
-    panic("dsadassa");
-    if(state<3){
-      state++;
-    }else{
-      state=0;
+  if(car_in_intersection==0&&wait_count>3){
+    int max = 0;
+    int next = 0;
+    for(int i=0;i<4;++i){
+      if(record[i]>max){
+        max = record[i];
+        next = i;
+      }
     }
+    state = next;
   }
   cv_broadcast(cv,cv_lock);
   lock_release(cv_lock);
