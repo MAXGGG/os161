@@ -151,7 +151,7 @@ enter_intersection(Direction d){
     cv_wait(cv, cv_lock);
     wait_count--;
   }
-  car_in_intersection++;
+  // car_in_intersection++;
   lock_release(cv_lock);
 }
 
@@ -159,8 +159,8 @@ void
 exit_intersection(int index){
   (void)index;
   lock_acquire(cv_lock);
-  car_in_intersection--;
-  if(car_in_intersection>=0){
+  // car_in_intersection--;
+  if(car_in_intersection==0){
     if(state<3){
       state++;
     }else{
