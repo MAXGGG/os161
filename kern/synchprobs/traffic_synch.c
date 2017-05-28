@@ -180,7 +180,7 @@ void
 exit_intersection(Direction d){
   lock_acquire(cv_lock);
   // car_in_intersection--;
-  if(car_in_intersection==0&&wait_count>3){
+  if(car_in_intersection==0){
     int max = 0;
     int next = 0;
     for(int i=0;i<4;++i){
