@@ -178,7 +178,6 @@ enter_intersection(Direction d){
 
 void
 exit_intersection(Direction d){
-  (void)index;
   lock_acquire(cv_lock);
   // car_in_intersection--;
   if(car_in_intersection==0&&wait_count>3){
