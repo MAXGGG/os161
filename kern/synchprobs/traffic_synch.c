@@ -192,7 +192,7 @@ intersection_before_entry(Direction origin, Direction destination)
   KASSERT(available_lock != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
-  enter_intersection(index);
+  enter_intersection(orign);
   
 }
 
