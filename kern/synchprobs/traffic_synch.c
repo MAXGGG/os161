@@ -146,11 +146,11 @@ get_index(Direction origin, Direction destination){
 void
 enter_intersection(Direction d){
   lock_acquire(cv_lock);
-  while(d!=all_directions[state]){
-    wait_count++;
-    cv_wait(cv, cv_lock);
-    wait_count--;
-  }
+  // while(d!=all_directions[state]){
+  //   wait_count++;
+  //   cv_wait(cv, cv_lock);
+  //   wait_count--;
+  // }
   car_in_intersection++;
   lock_release(cv_lock);
 }
