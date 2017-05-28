@@ -154,10 +154,10 @@ enter_intersection(Direction d){
     }else if(d = south){
       record[1]++;
     }else if(d = east){
-      record[2]++:
+      record[2]++;
     }
     else if(d = west){
-      record[3]++:
+      record[3]++;
     }
     cv_wait(cv, cv_lock);
     if(d==north){
@@ -165,10 +165,10 @@ enter_intersection(Direction d){
     }else if(d = south){
       record[1]--;
     }else if(d = east){
-      record[2]--:
+      record[2]--;
     }
     else if(d = west){
-      record[3]--:
+      record[3]--;
     }
     wait_count--;
   }
