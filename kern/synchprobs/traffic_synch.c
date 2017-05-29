@@ -115,7 +115,6 @@ intersection_sync_cleanup(void)
   KASSERT(lock != NULL);
   KASSERT(cv != NULL);
   array_destroy(all_cars);
-  array_destroy(cars_in);
   lock_destroy(lock);
   cv_destroy(cv);
 }
