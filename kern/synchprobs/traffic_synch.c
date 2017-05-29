@@ -156,8 +156,9 @@ intersection_sync_cleanup(void)
   for(int i=0;i<4;++i){
       cv_destroy(cv[i]);
   }
-  for(unsigned i=0;i<array_num(all_cars);++i){
-    array_remove(all_cars, i);
+
+  while(array_num(all_cars>0)){
+    array_remove(all_cars, 0);
   }
   array_destroy(all_cars);
   array_destroy(cars_in);
