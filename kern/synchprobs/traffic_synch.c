@@ -99,12 +99,6 @@ intersection_sync_cleanup(void)
   cv_destroy(cv_S);
 }
 
-int 
-get_direction(int index){
-  if(index==0||index==1||index==2){
-    return 
-  }
-}
 
 int
 get_index(Direction origin, Direction destination){ 
