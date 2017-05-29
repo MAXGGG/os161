@@ -64,7 +64,7 @@ check_can_enter(Vehicle* v){
 }
 
 bool
-if_collide(Vehicle* v1, Vehecle* v2){
+if_collide(Vehicle* v1, Vehicle* v2){
   if(v1->origin==v2->origin){
     return true;
   }else if(v1->origin==v2->destination&&v1->destination==v2->origin){
