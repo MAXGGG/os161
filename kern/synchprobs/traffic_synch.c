@@ -76,9 +76,6 @@ intersection_sync_init(void)
   if (cv_lock == NULL) {
     panic("could not create cv lock");
   }
-  if (cv == NULL) {
-    panic("could not create cv");
-  }
 
   return;
 }
@@ -95,7 +92,6 @@ intersection_sync_cleanup(void)
 {
   /* replace this default implementation with your own implementation */
   KASSERT(cv_lock != NULL);
-  KASSERT(cv != NULL);
   lock_destroy(cv_lock);
   cv_destroy(cv_E);
   cv_destroy(cv_N);
@@ -194,8 +190,7 @@ exit_intersection(int index){
 void
 intersection_before_entry(Direction origin, Direction destination) 
 {
-  KASSERT(cv_lock != NULL);
-  KASSERT(cv != NULL);
+  KASSERT(cv_lock != NULL);;
   int index = get_index(origin, destination);
   KASSERT(index != -1);
   enter_intersection(index);
@@ -218,7 +213,6 @@ void
 intersection_after_exit(Direction origin, Direction destination) 
 {
   KASSERT(cv_lock != NULL);
-  KASSERT(cv != NULL);
   int index = get_index(origin, destination);
   KASSERT(index != -1);
   exit_intersection(index);
