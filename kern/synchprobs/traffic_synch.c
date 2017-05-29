@@ -146,7 +146,7 @@ intersection_before_entry(Direction origin, Direction destination)
   // unsigned dummy;
   array_add(all_cars, v, NULL);
   lock_acquire(lock);
-  while(check_can_enter(v)){
+  while(!check_can_enter(v)){
     cv_wait(cv, lock);
   }
   array_add(cars_in, v, NULL);
