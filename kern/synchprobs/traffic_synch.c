@@ -118,7 +118,7 @@ enter_intersection(int index){
   while(available[index]>0){
     cv_wait(cv, cv_lock);
   }
-  for(int i=0;i<7;++i){
+  for(int i=0;i<10;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]++;
       }
