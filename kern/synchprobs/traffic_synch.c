@@ -128,7 +128,7 @@ enter_intersection(int index){
       cv_wait(cv_W, cv_lock);
     }else if(index==6||index==7||index==8){
       cv_wait(cv_S, cv_lock);
-    }else if(index==3||index==4||index==5){
+    }else if(index==9||index==10||index==11){
       cv_wait(cv_E, cv_lock);
     }
   }
@@ -163,7 +163,7 @@ exit_intersection(int index){
       cv_broadcast(cv_N, cv_lock);
       cv_broadcast(cv_E, cv_lock);
       cv_broadcast(cv_S, cv_lock);
-    }else if(index==3||index==4||index==5){
+    }else if(index==9||index==10||index==11){
       cv_broadcast(cv_W, cv_lock);
       cv_broadcast(cv_S, cv_lock);
       cv_broadcast(cv_N, cv_lock);
