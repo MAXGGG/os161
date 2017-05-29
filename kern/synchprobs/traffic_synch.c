@@ -35,7 +35,7 @@ typedef struct Vehicles
 
 
 bool check_can_enter(Vehicle*);
-bool if_collide(Vehicle*);
+bool if_collide(Vehicle*, Vehicle*);
 
 bool right_turn(Vehicle*);
 void remove_car_from_intersection(Direction, Direction);
@@ -55,7 +55,7 @@ right_turn(Vehicle* v) {
 
 bool
 check_can_enter(Vehicle* v){
-  for(int i=0;i<num(cars_in);++i){
+  for(int i=0;i<array_num(cars_in);++i){
     Vehicle* in = array_get(cars_in, i);
     if(!if_collide(in, v))
       return false;
@@ -143,19 +143,20 @@ intersection_before_entry(Direction origin, Direction destination)
   Vehicle* v = kmalloc(sizeof(struct Vehicle));
   v->origin = origin;
   v->destination = destination;
-  array_add(all_cars, v);
+  int dummy;
+  array_add(all_cars, v, dummy);
   lock_acquire(lock);
   while(check_can_enter(v)){
     cv_wait(cv, lock);
   }
-  array_add(cars_in, v);
+  array_add(cars_in, v, dummy);
   lock_release(lock);
 }
 
 
 void
 remove_car_from_intersection(Direction o, Direction d){
-  for(int i=0; i<num(cars_in);++i){
+  for(int i=0; i<array_num(cars_in);++i){
     if(cars_in[i]->origin==o&&cars_in[i]->destination==d){
       array_remove(cars_in, i);
       break;
