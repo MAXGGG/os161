@@ -58,7 +58,7 @@ right_turn(Vehicle* v) {
 
 int 
 direction_to_int(Direction d){
-  if(d==nouth){
+  if(d==north){
     return 0;
   }else if(d==west){
     return 1;
