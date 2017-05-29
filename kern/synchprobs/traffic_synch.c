@@ -23,7 +23,10 @@
  */
 // static struct semaphore *intersectionSem;
 static struct lock *cv_lock;
-static struct cv *cv;
+static struct cv *cv_N;
+static struct cv *cv_W;
+static struct cv *cv_E;
+static struct cv *cv_S;
 
 /*
  *arrary for availabilities 
@@ -36,18 +39,18 @@ static struct cv *cv;
 int volatile max = 6;
 int volatile available[12] = {0};
 
-int volatile disable_list[12][10] = {{4,6,7,9,10,0,1,2,-1,-1},
-                                    {3,4,5,6,9,10,0,1,2,-1},
-                                    {3,4,6,7,8,9,10,0,1,2},
-                                    {1,2,6,7,9,10,11,3,4,5},
-                                    {1,2,6,7,8,9,3,4,5,-1},
-                                    {1,2,7,9,10,3,4,5,-1,-1},
-                                    {0,1,2,3,4,9,10,6,7,8},
-                                    {2,3,4,9,10,11,6,7,8,-1},
-                                    {1,2,3,4,10,8,6,7,-1,-1},
-                                    {1,2,3,4,5,6,7,9,10,11},
-                                    {0,1,2,3,6,7,9,10,11,-1},
-                                    {1,3,4,6,7,9,10,11-1,-1}};
+int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
+                                    {3,4,5,6,9,10,-1},
+                                    {3,4,6,7,8,9,10},
+                                    {1,2,6,7,9,10,11},
+                                    {1,2,6,7,8,9,-1},
+                                    {1,2,7,9,10,-1,-1},
+                                    {0,1,2,3,4,9,10},
+                                    {2,3,4,9,10,11,-1},
+                                    {1,2,3,4,10,-1,-1},
+                                    {1,2,3,4,5,6,7},
+                                    {0,1,2,3,6,7,-1},
+                                    {1,3,4,6,7,-1,-1}};
 
 int get_index(Direction, Direction);
 void enter_intersection(int);
@@ -66,7 +69,10 @@ intersection_sync_init(void)
   /* replace this default implementation with your own implementation */
 
   cv_lock = lock_create("cv_lock");
-  cv = cv_create("cv");
+  cv_E = cv_create("cv_E");
+  cv_N = cv_create("cv_N");
+  cv_S = cv_create("cv_E");
+  cv_W = cv_create("cv_W");
   if (cv_lock == NULL) {
     panic("could not create cv lock");
   }
@@ -91,7 +97,17 @@ intersection_sync_cleanup(void)
   KASSERT(cv_lock != NULL);
   KASSERT(cv != NULL);
   lock_destroy(cv_lock);
-  cv_destroy(cv);
+  cv_destroy(cv_E);
+  cv_destroy(cv_N);
+  cv_destroy(cv_W);
+  cv_destroy(cv_S);
+}
+
+int 
+get_direction(int index){
+  if(index==0||index==1||index==2){
+    return 
+  }
 }
 
 int
@@ -116,9 +132,17 @@ void
 enter_intersection(int index){
   lock_acquire(cv_lock);
   while(available[index]>0){
-    cv_wait(cv, cv_lock);
+    if(index==0||index==1||index==2){
+      cv_wait(cv_N, cv_lock);
+    }else if(index==3||index==4||index==5){
+      cv_wait(cv_W, cv_lock);
+    }else if(index==6||index==7||index==8){
+      cv_wait(cv_S, cv_lock);
+    }else if(index==3||index==4||index==5){
+      cv_wait(cv_E, cv_lock);
+    }
   }
-  for(int i=0;i<10;++i){
+  for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]++;
       }
@@ -129,12 +153,28 @@ enter_intersection(int index){
 void
 exit_intersection(int index){
   lock_acquire(cv_lock);
-  for(int i=0;i<10;++i){
+  for(int i=0;i<7;++i){
       if(disable_list[index][i]!=-1){
         available[disable_list[index][i]]--;
       }
   }
-  cv_broadcast(cv,cv_lock);
+  if(index==0||index==1||index==2){
+      cv_broadcast(cv_W, cv_lock);
+      cv_broadcast(cv_S, cv_lock);
+      cv_broadcast(cv_E, cv_lock);
+    }else if(index==3||index==4||index==5){
+      cv_broadcast(cv_N, cv_lock);
+      cv_broadcast(cv_S, cv_lock);
+      cv_broadcast(cv_E, cv_lock);
+    }else if(index==6||index==7||index==8){
+      cv_broadcast(cv_W, cv_lock);
+      cv_broadcast(cv_N, cv_lock);
+      cv_broadcast(cv_E, cv_lock);
+    }else if(index==3||index==4||index==5){
+      cv_broadcast(cv_W, cv_lock);
+      cv_broadcast(cv_S, cv_lock);
+      cv_broadcast(cv_N, cv_lock);
+    }
   lock_release(cv_lock);
 }
 
