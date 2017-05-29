@@ -2,6 +2,7 @@
 #include <lib.h>
 #include <synchprobs.h>
 #include <synch.h>
+#include <array.h>
 #include <opt-A1.h>
 
 /* 
@@ -23,6 +24,8 @@
  */
 static struct lock *lock;
 static struct cv *cv;
+static struct array* all_cars;
+static struct array* cars_in;
 
 typedef struct Vehicles
 {
@@ -30,26 +33,20 @@ typedef struct Vehicles
   Direction destination;
 } Vehicle;
 
-typedef struct Intersections
-{
-  Vehicle volatile cars[10];
-  int current_number;
-} Intersection;
 
-bool check_can_enter(Intersection, Vehicle);
-bool if_collide(Vehicle, Vehicle);
+bool check_can_enter(Vehicle*);
+bool if_collide(Vehicle*);
 
-bool right_turn(Vehicle);
-void add_car_to_intersection(Intersection, Vehicle);
-void remove_car_from_intersection(Intersection, Vehicle);
+bool right_turn(Vehicle*);
+void remove_car_from_intersection(Direction, Direction);
 
 bool
-right_turn(Vehicle v) {
+right_turn(Vehicle* v) {
   KASSERT(v != NULL);
-  if (((v.origin == west) && (v.destination == south)) ||
-      ((v.origin == south) && (v.destination == east)) ||
-      ((v.origin == east) && (v.destination == north)) ||
-      ((v.origin == north) && (v.destination == west))) {
+  if (((v->origin == west) && (v->destination == south)) ||
+      ((v->origin == south) && (v->destination == east)) ||
+      ((v->origin == east) && (v->destination == north)) ||
+      ((v->origin == north) && (v->destination == west))) {
     return true;
   } else {
     return false;
@@ -57,29 +54,27 @@ right_turn(Vehicle v) {
 }
 
 bool
-check_can_enter(Intersection i, Vheicle v){
-  for(int i=0;i<10;++i){
-    if(i.cars[i]!=NULL){
-      if(!if_collide(i.cars[i], v))
-        return false;
-    }
+check_can_enter(Vehicle* v){
+  for(int i=0;i<num(cars_in);++i){
+    Vehicle* in = array_get(cars_in, i);
+    if(!if_collide(in, v))
+      return false;
   }
   return true;
 }
 
 bool
-if_collide(Vehicle v1, Vehecle v2){
-  if(v1.origin==v2.origin){
+if_collide(Vehicle* v1, Vehecle* v2){
+  if(v1->origin==v2->origin){
     return true;
-  }else if(v1.origin==v2.destination&&v1.destination==v2.origin){
+  }else if(v1->origin==v2->destination&&v1->destination==v2->origin){
     return true;
-  }else if(v1.destination!=v2.destination&&(right_turn(v1)||right_turn(v2))){
+  }else if(v1->destination!=v2->destination&&(right_turn(v1)||right_turn(v2))){
     return true;
   }
   return false;
 }
 
-Intersection volatile i;
 /* 
  * The simulation driver will call this function once before starting
  * the simulation
@@ -94,6 +89,8 @@ intersection_sync_init(void)
 
   lock = lock_create("lock");
   cv = cv_create("cv");
+  all_cars = array_create();
+  cars_in = array_create();
   if (lock == NULL) {
     panic("could not create lock");
   }
@@ -101,28 +98,9 @@ intersection_sync_init(void)
     panic("could not create cv");
   }
 
-  for(int i=0; i<10;++i){
-    i.cars[i] = NULL;
-  }
-
   return;
 }
 
-void 
-add_car_to_intersection(Intersection i, Vehicle v){
-  i.[current_number] = v;
-  ++current_number;
-}
-
-void
-remove_car_from_intersection(Intersection i, Direction o, Direction d){
-  for(int i=0;i<10;++i){
-    if(i.cars[i]!=NULL&&i.cars[i].origin==o&&i.cars[i].destination==d){
-      i.cars[i] = NULL;
-      break;
-    }
-  }
-}
 /* 
  * The simulation driver will call this function once after
  * the simulation has finished
@@ -136,6 +114,8 @@ intersection_sync_cleanup(void)
   /* replace this default implementation with your own implementation */
   KASSERT(lock != NULL);
   KASSERT(cv != NULL);
+  array_cleanup(all_cars);
+  array_cleanup(cars_in);
   lock_destroy(lock);
   cv_destroy(cv);
 }
@@ -160,15 +140,27 @@ intersection_before_entry(Direction origin, Direction destination)
   /* replace this default implementation with your own implementation */
   KASSERT(cv != NULL);
   KASSERT(lock != NULL);
-  Vehicle v;
-  v.origin = origin;
-  v.destination = destination;
+  Vehicle* v = kmalloc(sizeof(struct Vehicle));
+  v->origin = origin;
+  v->destination = destination;
+  array_add(all_cars, v);
   lock_acquire(lock);
-  while(check_can_enter(i,v)){
+  while(check_can_enter(v)){
     cv_wait(cv, lock);
   }
-  add_car_to_intersection(i, v);
+  array_add(cars_in, v);
   lock_release(lock);
+}
+
+
+void
+remove_car_from_intersection(Direction o, Direction d){
+  for(int i=0; i<num(cars_in);++i){
+    if(cars_in[i]->origin==o&&cars_in[i]->destination==d){
+      array_remove(cars_in, i);
+      break;
+    }
+  }
 }
 
 
@@ -190,7 +182,7 @@ intersection_after_exit(Direction origin, Direction destination)
   KASSERT(cv != NULL);
   KASSERT(lock != NULL);
   lock_acquire(lock);
-  remove_car_from_intersection(i, origin, destination);
+  remove_car_from_intersection(origin, destination);
   cv_broadcast(cv, lock);
   lock_release(lock);
 }
