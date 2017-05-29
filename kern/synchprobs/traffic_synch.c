@@ -22,24 +22,42 @@
 /*
  * replace this with declarations of any synchronization and other variables you need here
  */
+
+//lock for all cvs
 static struct lock *lock;
+
+//one cv for each direction
 static struct cv *cv[4];
+
+//array to keep track all cars
 static struct array* all_cars;
+
+//array to track cares currently in intersecion
 static struct array* cars_in;
 
+//Car structure to fit in arrays
 typedef struct Vehicle
 {
   Direction origin;
   Direction destination;
 } Vehicle;
 
-
+//Check if vehicle can enter the intersetion or not,
+//by checking if it collides with any of the car that
+//is in the intersetion
 bool check_can_enter(Vehicle*);
+
+//Check if two car collide or not followed those
+//three rules
 bool if_collide(Vehicle*, Vehicle*);
 
+//Check if a car is right turning
 bool right_turn(Vehicle*);
+
+//remove the car from the interstion array after exits
 void remove_car_from_intersection(Direction, Direction);
 
+//Convert direction to int for accessing array
 //0-N, 1-W, 2-S, 3-E
 int direction_to_int(Direction);
 
@@ -134,7 +152,7 @@ intersection_sync_cleanup(void)
   /* replace this default implementation with your own implementation */
   KASSERT(lock != NULL);
   KASSERT(cv != NULL);
-  // array_destroy(all_cars);
+  array_destroy(all_cars);
   lock_destroy(lock);
   for(int i=0;i<4;++i){
       cv_destroy(cv[i]);
