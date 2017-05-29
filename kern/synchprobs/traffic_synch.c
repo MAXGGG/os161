@@ -27,7 +27,7 @@ static struct cv *cv;
 static struct array* all_cars;
 static struct array* cars_in;
 
-typedef struct Vehicles
+typedef struct Vehicle
 {
   Direction origin;
   Direction destination;
