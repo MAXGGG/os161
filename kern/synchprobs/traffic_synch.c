@@ -157,8 +157,9 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 remove_car_from_intersection(Direction o, Direction d){
   for(unsigned i=0; i<array_num(cars_in);++i){
-    Direction origin = array_get(cars_in, i)->origin;
-    Direction destination = array_get(cars_in, i)->destination;
+    Vehicle* v = array_get(cars_in, i);
+    Direction origin = v->origin;
+    Direction destination = v->destination;
     if(origin==o&&destination==d){
       array_remove(cars_in, i);
       break;
