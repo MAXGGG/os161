@@ -152,18 +152,22 @@ exit_intersection(int index){
       cv_broadcast(cv_W, cv_lock);
       cv_broadcast(cv_S, cv_lock);
       cv_broadcast(cv_E, cv_lock);
+      cv_broadcast(cv_N, cv_lock);
     }else if(index==3||index==4||index==5){
       cv_broadcast(cv_N, cv_lock);
       cv_broadcast(cv_S, cv_lock);
       cv_broadcast(cv_E, cv_lock);
+      cv_broadcast(cv_W, cv_lock);
     }else if(index==6||index==7||index==8){
       cv_broadcast(cv_W, cv_lock);
       cv_broadcast(cv_N, cv_lock);
       cv_broadcast(cv_E, cv_lock);
+      cv_broadcast(cv_S, cv_lock);
     }else if(index==3||index==4||index==5){
       cv_broadcast(cv_W, cv_lock);
       cv_broadcast(cv_S, cv_lock);
       cv_broadcast(cv_N, cv_lock);
+      cv_broadcast(cv_E, cv_lock);
     }
   lock_release(cv_lock);
 }
