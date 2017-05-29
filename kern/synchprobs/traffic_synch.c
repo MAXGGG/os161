@@ -143,7 +143,7 @@ intersection_before_entry(Direction origin, Direction destination)
   Vehicle* v = kmalloc(sizeof(struct Vehicle));
   v->origin = origin;
   v->destination = destination;
-  int dummy;
+  unsigned dummy;
   array_add(all_cars, v, dummy);
   lock_acquire(lock);
   while(check_can_enter(v)){
@@ -157,7 +157,7 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 remove_car_from_intersection(Direction o, Direction d){
   for(unsigned i=0; i<array_num(cars_in);++i){
-    if(cars_in[i]->origin==o&&cars_in[i]->destination==d){
+    if(array_get(cars_in, i)->origin==o&&array_get(cars_in, i)->destination==d){
       array_remove(cars_in, i);
       break;
     }
