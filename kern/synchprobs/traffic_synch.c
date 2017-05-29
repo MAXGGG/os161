@@ -29,9 +29,6 @@ static struct lock *lock;
 //one cv for each direction
 static struct cv *cv[4];
 
-//array to keep track all cars
-static struct array* all_cars;
-
 //array to track cares currently in intersecion
 static struct array* cars_in;
 
@@ -127,7 +124,6 @@ intersection_sync_init(void)
   cv[1] = cv_create("cv1");
   cv[2] = cv_create("cv2");
   cv[3] = cv_create("cv3");
-  all_cars = array_create();
   cars_in = array_create();
   if (lock == NULL) {
     panic("could not create lock");
@@ -156,11 +152,6 @@ intersection_sync_cleanup(void)
   for(int i=0;i<4;++i){
       cv_destroy(cv[i]);
   }
-
-  while(array_num(all_cars)>0){
-    array_remove(all_cars, 0);
-  }
-  array_destroy(all_cars);
   array_destroy(cars_in);
 
 }
@@ -189,7 +180,6 @@ intersection_before_entry(Direction origin, Direction destination)
   v->origin = origin;
   v->destination = destination;
   // unsigned dummy;
-  array_add(all_cars, v, NULL);
   lock_acquire(lock);
   while(!check_can_enter(v)){
     cv_wait(cv[direction_to_int(origin)], lock);
