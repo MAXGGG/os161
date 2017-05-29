@@ -23,7 +23,7 @@
  * replace this with declarations of any synchronization and other variables you need here
  */
 static struct lock *lock;
-static struct cv *cv;
+static struct cv *cv[4];
 static struct array* all_cars;
 static struct array* cars_in;
 
@@ -40,6 +40,9 @@ bool if_collide(Vehicle*, Vehicle*);
 bool right_turn(Vehicle*);
 void remove_car_from_intersection(Direction, Direction);
 
+//0-N, 1-W, 2-S, 3-E
+int direction_to_int(Direction);
+
 bool
 right_turn(Vehicle* v) {
   KASSERT(v != NULL);
@@ -51,6 +54,20 @@ right_turn(Vehicle* v) {
   } else {
     return false;
   }
+}
+
+int 
+direction_to_int(Direction d){
+  if(d==nouth){
+    return 0;
+  }else if(d==west){
+    return 1;
+  }else if(d==south){
+    return 2;
+  }else if(d==east){
+    return 3;
+  }
+  return -1;
 }
 
 bool
@@ -88,7 +105,10 @@ intersection_sync_init(void)
   /* replace this default implementation with your own implementation */
 
   lock = lock_create("lock");
-  cv = cv_create("cv");
+  cv[0] = cv_create("cv0");
+  cv[1] = cv_create("cv1");
+  cv[2] = cv_create("cv2");
+  cv[3] = cv_create("cv3");
   all_cars = array_create();
   cars_in = array_create();
   if (lock == NULL) {
@@ -116,7 +136,9 @@ intersection_sync_cleanup(void)
   KASSERT(cv != NULL);
   // array_destroy(all_cars);
   lock_destroy(lock);
-  cv_destroy(cv);
+  for(int i=0;i<4;++i){
+      cv_destroy(cv[i]);
+  }
 }
 
 
@@ -146,7 +168,7 @@ intersection_before_entry(Direction origin, Direction destination)
   array_add(all_cars, v, NULL);
   lock_acquire(lock);
   while(!check_can_enter(v)){
-    cv_wait(cv, lock);
+    cv_wait(cv[direction_to_int(origin)], lock);
   }
   array_add(cars_in, v, NULL);
   lock_release(lock);
@@ -186,6 +208,8 @@ intersection_after_exit(Direction origin, Direction destination)
   KASSERT(lock != NULL);
   lock_acquire(lock);
   remove_car_from_intersection(origin, destination);
-  cv_broadcast(cv, lock);
+  for(int i=0;i<4;++i){
+      cv_broadcast(cv[i], lock);
+  }
   lock_release(lock);
 }
