@@ -55,7 +55,7 @@ right_turn(Vehicle* v) {
 
 bool
 check_can_enter(Vehicle* v){
-  for(int i=0;i<array_num(cars_in);++i){
+  for(unsigned i=0;i<array_num(cars_in);++i){
     Vehicle* in = array_get(cars_in, i);
     if(!if_collide(in, v))
       return false;
@@ -156,7 +156,7 @@ intersection_before_entry(Direction origin, Direction destination)
 
 void
 remove_car_from_intersection(Direction o, Direction d){
-  for(int i=0; i<array_num(cars_in);++i){
+  for(unsigned i=0; i<array_num(cars_in);++i){
     if(cars_in[i]->origin==o&&cars_in[i]->destination==d){
       array_remove(cars_in, i);
       break;
