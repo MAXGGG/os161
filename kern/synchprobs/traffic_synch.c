@@ -21,40 +21,14 @@
 /*
  * replace this with declarations of any synchronization and other variables you need here
  */
-// static struct semaphore *intersectionSem;
-static struct lock *cv_lock;
-static struct cv *cv_N;
-static struct cv *cv_W;
-static struct cv *cv_E;
-static struct cv *cv_S;
+//static struct semaphore *intersectionSem;
 
-/*
- *arrary for availabilities 
- *0:N-W, 1:N-S, 2:N-E
- *3:W-N, 4:W-E, 5:W-S
- *6:S-W, 7:S-N, 8:S-E
- *9:E-S, 10:E-W, 11:E-N
- */
-
-int volatile max = 6;
-int volatile available[12] = {0};
-
-int volatile disable_list[12][7] = {{4,6,7,9,10,-1,-1},
-                                    {3,4,5,6,9,10,-1},
-                                    {3,4,6,7,8,9,10},
-                                    {1,2,6,7,9,10,11},
-                                    {1,2,6,7,8,9,-1},
-                                    {1,2,7,9,10,-1,-1},
-                                    {0,1,2,3,4,9,10},
-                                    {2,3,4,9,10,11,-1},
-                                    {1,2,3,4,10,-1,-1},
-                                    {1,2,3,4,5,6,7},
-                                    {0,1,2,3,6,7,-1},
-                                    {1,3,4,6,7,-1,-1}};
-
-int get_index(Direction, Direction);
-void enter_intersection(int);
-void exit_intersection(int);
+//Number of cars going from ori to des
+static int NumCars[4][4];
+//The lock of intercection that work with all the cvs
+static struct lock *InterLock;
+//Each ori to des has a cv that will check if the car is safe to go(ie satisfies the 3 conditions so that will not collide with other cars in the intersection)
+static struct cv *ODcv[4][4];
 
 /* 
  * The simulation driver will call this function once before starting
@@ -63,21 +37,71 @@ void exit_intersection(int);
  * You can use it to initialize synchronization and other variables.
  * 
  */
+
+
+bool
+right_turn(Direction origin, Direction destination);
+bool
+no_collision(Direction o, Direction d);
+
+//helper function: determine if the car is makeing a right turn
+
+bool
+right_turn(Direction origin, Direction destination) {
+  if (((origin == west) && (destination == south)) ||
+      ((origin == south) && (destination == east)) ||
+      ((origin == east) && (destination == north)) ||
+      ((origin == north) && (destination == west))) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//helper function: determine if the car is safe to go
+
+bool
+no_collision(Direction o, Direction d){
+	for (unsigned int i=0; i<4; ++i){
+		for (unsigned int j=0; j<4; ++j){
+			//compare current car's ori and des with the cars in the intersection
+			if(NumCars[i][j] > 0){
+				// checking the 3 conditions given for safty
+				if((o == i) || 
+                                   (o == j && d == i) || 
+		                   (d != j && right_turn(o,d)) ||
+				   (d != j && i-j == 1) ||
+				   (d != j && i == 0 && j == 3)){
+					continue;}
+				else{ return false;}
+
+			}
+		}
+	}
+	return true;
+}
+
+
+
 void
 intersection_sync_init(void)
 {
+
+
   /* replace this default implementation with your own implementation */
+	InterLock = lock_create("InterLock");
+	if(InterLock == NULL){panic("InterLock init");}
+	
+	for (int i=0; i<4; ++i){
+		for (int j=0; j<4; ++j){
+			NumCars[i][j] = 0;
 
-  cv_lock = lock_create("cv_lock");
-  cv_E = cv_create("cv_E");
-  cv_N = cv_create("cv_N");
-  cv_S = cv_create("cv_E");
-  cv_W = cv_create("cv_W");
-  if (cv_lock == NULL) {
-    panic("could not create cv lock");
-  }
+			ODcv[i][j] = cv_create("ODcv");
+			if(ODcv[i][j] == NULL){panic("ODcv init");}
+		}
+	}
+	return;
 
-  return;
 }
 
 /* 
@@ -91,86 +115,19 @@ void
 intersection_sync_cleanup(void)
 {
   /* replace this default implementation with your own implementation */
-  KASSERT(cv_lock != NULL);
-  lock_destroy(cv_lock);
-  cv_destroy(cv_E);
-  cv_destroy(cv_N);
-  cv_destroy(cv_W);
-  cv_destroy(cv_S);
+	KASSERT(InterLock != NULL);
+	lock_destroy(InterLock);
+
+	for (int i=0; i<4; ++i){
+		for (int j=0; j<4; ++j){
+			
+			KASSERT(ODcv[i][j] != NULL);
+			cv_destroy(ODcv[i][j]);
+		
+		}
+	}
 }
 
-
-int
-get_index(Direction origin, Direction destination){ 
-  if(origin==north&&destination==west) return 0;
-  if(origin==north&&destination==south) return 1;
-  if(origin==north&&destination==east) return 2;
-  if(origin==west &&destination==north) return 3;
-  if(origin==west &&destination==east) return 4;
-  if(origin==west &&destination==south) return 5;
-  if(origin==south&&destination==west) return 6;
-  if(origin==south&&destination==north) return 7;
-  if(origin==south&&destination==east) return 8;
-  if(origin==east &&destination==south) return 9;
-  if(origin==east &&destination==west) return 10;
-  if(origin==east &&destination==north) return 11;
-  return -1;
-}
-
-
-void
-enter_intersection(int index){
-  lock_acquire(cv_lock);
-  while(available[index]>0){
-    if(index==0||index==1||index==2){
-      cv_wait(cv_N, cv_lock);
-    }else if(index==3||index==4||index==5){
-      cv_wait(cv_W, cv_lock);
-    }else if(index==6||index==7||index==8){
-      cv_wait(cv_S, cv_lock);
-    }else if(index==9||index==10||index==11){
-      cv_wait(cv_E, cv_lock);
-    }
-  }
-  for(int i=0;i<7;++i){
-      if(disable_list[index][i]!=-1){
-        available[disable_list[index][i]]++;
-      }
-  }
-  lock_release(cv_lock);
-}
-
-void
-exit_intersection(int index){
-  lock_acquire(cv_lock);
-  for(int i=0;i<7;++i){
-      if(disable_list[index][i]!=-1){
-        available[disable_list[index][i]]--;
-      }
-  }
-  if(index==0||index==1||index==2){
-      cv_broadcast(cv_W, cv_lock);
-      cv_broadcast(cv_S, cv_lock);
-      cv_broadcast(cv_E, cv_lock);
-      cv_broadcast(cv_N, cv_lock);
-    }else if(index==3||index==4||index==5){
-      cv_broadcast(cv_N, cv_lock);
-      cv_broadcast(cv_S, cv_lock);
-      cv_broadcast(cv_E, cv_lock);
-      cv_broadcast(cv_W, cv_lock);
-    }else if(index==6||index==7||index==8){
-      cv_broadcast(cv_W, cv_lock);
-      cv_broadcast(cv_N, cv_lock);
-      cv_broadcast(cv_E, cv_lock);
-      cv_broadcast(cv_S, cv_lock);
-    }else if(index==9||index==10||index==11){
-      cv_broadcast(cv_W, cv_lock);
-      cv_broadcast(cv_S, cv_lock);
-      cv_broadcast(cv_N, cv_lock);
-      cv_broadcast(cv_E, cv_lock);
-    }
-  lock_release(cv_lock);
-}
 
 /*
  * The simulation driver will call this function each time a vehicle
@@ -188,11 +145,25 @@ exit_intersection(int index){
 void
 intersection_before_entry(Direction origin, Direction destination) 
 {
-  KASSERT(cv_lock != NULL);;
-  int index = get_index(origin, destination);
-  KASSERT(index != -1);
-  enter_intersection(index);
-  
+  /* replace this default implementation with your own implementation */
+	
+	//kprintf("%d%d\n",origin,destination);
+
+  KASSERT(InterLock != NULL);
+	lock_acquire(InterLock);
+
+	//block until it is safe to pass
+	while(1){
+		if(no_collision(origin,destination)){
+			++NumCars[origin][destination];
+			lock_release(InterLock);
+			break;
+		}
+		else{
+			cv_wait(ODcv[origin][destination],InterLock);
+		}
+	}
+	//let the car pass
 }
 
 
@@ -210,9 +181,19 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 intersection_after_exit(Direction origin, Direction destination) 
 {
-  KASSERT(cv_lock != NULL);
-  int index = get_index(origin, destination);
-  KASSERT(index != -1);
-  exit_intersection(index);
-}
+	KASSERT(InterLock != NULL);
+	
+	lock_acquire(InterLock);
 
+	--NumCars[origin][destination];
+
+	for (int i=0; i<4; ++i){
+		for (int j=0; j<4; ++j){
+			
+			cv_broadcast(ODcv[i][j],InterLock);	
+		}
+	}
+	
+	lock_release(InterLock);
+
+}
