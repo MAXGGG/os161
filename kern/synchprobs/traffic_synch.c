@@ -34,7 +34,7 @@ typedef struct Intersections
 {
   Vehicle volatile cars[10];
   int current_number;
-} Intersetion;
+} Intersection;
 
 bool check_can_enter(Intersection, Vehicle);
 bool if_collide(Vehicle, Vehicle);
