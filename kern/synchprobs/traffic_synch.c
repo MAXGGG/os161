@@ -152,11 +152,16 @@ intersection_sync_cleanup(void)
   /* replace this default implementation with your own implementation */
   KASSERT(lock != NULL);
   KASSERT(cv != NULL);
-  array_destroy(all_cars);
   lock_destroy(lock);
   for(int i=0;i<4;++i){
       cv_destroy(cv[i]);
   }
+  for(unsigned i=0;i<array_num(all_cars);++i){
+    array_remove(all_cars, i);
+  }
+  array_destroy(all_cars);
+  array_destroy(cars_in);
+
 }
 
 
