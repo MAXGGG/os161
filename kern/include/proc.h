@@ -46,7 +46,7 @@
 	#endif
 
 	DECLARRAY_BYTYPE(parray, struct proc);
-	DEFARRAY_BYTYPE(parray, struct proc, PROCINLINE);
+	DEFARRAY_BYTYPE(parray, struct proc, PARRAYINLINE);
 #endif
 
 struct addrspace;
