@@ -41,16 +41,13 @@
 #include "opt-A2.h"
 
 #if OPT_A2
-DECLARRAY_BYTYPE(parray, struct proc);
+ 	#ifndef PARRAYINLINE
+	#define PARRAYINLINE INLINE
+	#endif
 
-#ifndef PARRAYINLINE
-#define PARRAYINLINE INLINE
+	DECLARRAY_BYTYPE(parray, struct proc);
+	DEFARRAY_BYTYPE(parray, struct proc, PROCINLINE);
 #endif
-
-DEFARRAY_BYTYPE(parray, struct proc, PARRAYINLINE);
-
-#endif
-
 
 struct addrspace;
 struct vnode;
