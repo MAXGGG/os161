@@ -84,6 +84,8 @@ struct proc {
 	pid_t parent;
 	int p_exitcode;
 	int p_state;
+	lock *p_cv_lock;
+	cv *p_cv;
 	#endif
 };
 

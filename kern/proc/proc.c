@@ -79,16 +79,20 @@ struct semaphore *no_proc_sem;
 
 #if OPT_A2
 static struct proc *process_table[PID_MAX] = {NULL};
+struct lock *table_lock;
 
 int
 getAvailablePID()
-{
+{	int retval = -1;
+	lock_acquire(table_lock);
 	for(int i=PID_MIN;i<=PID_MAX;++i){
 		if(process_table[i]==NULL){
-			return i;
+			retval = i;
+			break;
 		}
 	}
-	return -1;
+	lock_release(table_lock);
+	return retval;
 }
 #endif
 
@@ -129,12 +133,16 @@ proc_create(const char *name)
 	proc->p_id = (pid_t)getAvailablePID();
 	if(proc->p_id!=-1)
 	{
-		DEBUG(DB_EXEC, "*********ELF: p id is  created %lu\n", 
+		DEBUG(DB_EXEC, "*********ELF: p id %lu is created\n",
      (unsigned long) proc->p_id);
+	  lock_acquire(table_lock);
 		process_table[(int)proc->p_id] = proc;
+		lock_release(table_lock);
 	}
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
+	p_cv_lock = lock_create("p_cv_lock");
+	p_cv = cv_create("p_cv");
 #endif
 
 	return proc;
@@ -165,9 +173,11 @@ proc_destroy(struct proc *proc)
 	 */
 
 	 #if OPT_A2
-	 DEBUG(DB_EXEC, "*********ELF: p id is released %lu\n",
+	 DEBUG(DB_EXEC, "*********ELF: p id  %lu is released \n",
 	(unsigned long) proc->p_id);
 	 	process_table[(int)proc->p_id] = NULL;
+		lock_destroy(p_cv_lock);
+		cv_destroy(p_cv);
 	 #endif
 
 	/* VFS fields */
@@ -247,6 +257,10 @@ proc_bootstrap(void)
     panic("could not create no_proc_sem semaphore\n");
   }
 #endif // UW
+#if OPT_A2
+	table_lock = lock_create("table_lock");
+	KASSERT(table_lock!=NULL);
+#endif
 }
 
 /*
