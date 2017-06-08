@@ -85,8 +85,9 @@ pid_t
 getAvailablePID()
 {
 	for(int i=PID_MIN;i<=PID_MAX;++i){
-		DEBUG(DB_EXEC, "ELF: Loading %lu \n",
-     (unsigned long) i);
+		unsigned s = parray_num(&process_table);
+		DEBUG(DB_EXEC, "size is %lu \n",
+     (unsigned long) s);
 	// 	struct proc * p = parray_get(&process_table, (unsigned)i);
 	// 	if(p!=NULL){
 	// 		return (pid_t)i;
