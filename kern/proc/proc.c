@@ -245,6 +245,7 @@ proc_bootstrap(void)
 	#if OPT_A2
 		table_lock = lock_create("table_lock");
 		KASSERT(table_lock!=NULL);
+		DEBUG(DB_EXEC, "*********lock created");
 	#endif
   kproc = proc_create("[kernel]");
   if (kproc == NULL) {
