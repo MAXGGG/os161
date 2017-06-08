@@ -78,7 +78,7 @@ struct semaphore *no_proc_sem;
 #endif  // UW
 
 #if OPT_A2
-static proc* process_table[PID_MAX] = {NULL};
+static struct proc *process_table[PID_MAX] = {NULL};
 
 int
 getAvailablePID()
