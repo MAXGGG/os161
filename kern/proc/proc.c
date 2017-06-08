@@ -85,7 +85,7 @@ pid_t
 getAvailablePID()
 {
 	for(int i=PID_MIN;i<=PID_MAX;++i){
-		DEBUG(DB_EXEC, "ELF: Loading %lu \n", 
+		DEBUG(DB_EXEC, "ELF: Loading %lu \n",
      (unsigned long) i);
 		struct proc * p = parray_get(&process_table, (unsigned)i);
 		if(p!=NULL){
@@ -130,7 +130,7 @@ proc_create(const char *name)
 #endif // UW
 
 #if OPT_A2
-	// proc->p_id = getAvailablePID();
+	proc->p_id = getAvailablePID();
 	// parray_set(&process_table,(unsigned)proc->p_id, proc);
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
