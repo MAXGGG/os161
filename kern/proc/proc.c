@@ -216,7 +216,7 @@ proc_destroy(struct proc *proc)
 #endif // UW
 
 #if OPT_A2
-	parray_set(process_table, (unsigned)proc->p_id, NULL);
+	parray_set(&process_table, (unsigned)proc->p_id, NULL);
 #endif
 
 
