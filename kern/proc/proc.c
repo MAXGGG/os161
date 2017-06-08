@@ -130,14 +130,18 @@ proc_create(const char *name)
 #endif // UW
 
 #if OPT_A2
+	if(name!="[kernel]"){
 	proc->p_id = (pid_t)getAvailablePID();
 	if(proc->p_id!=-1)
 	{
 		DEBUG(DB_EXEC, "*********ELF: p id %lu is created\n",
      (unsigned long) proc->p_id);
-	//   lock_acquire(table_lock);
+	  lock_acquire(table_lock);
 		process_table[(int)proc->p_id] = proc;
-		// lock_release(table_lock);
+		lock_release(table_lock);
+	}}else{
+		proc->p_id = PID_MIN;
+		process_table[PID_MIN] = proc;
 	}
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
