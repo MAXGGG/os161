@@ -85,7 +85,7 @@ pid_t
 getAvailablePID()
 {
 	for(int i=PID_MIN;i<=PID_MAX;++i){
-		struct proc * p = parray_get(process_table, (unsigned)i);
+		struct proc * p = parray_get(&process_table, (unsigned)i);
 		if(p!=NULL){
 			return (pid_t)i;
 		}
