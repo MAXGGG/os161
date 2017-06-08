@@ -127,7 +127,7 @@ proc_create(const char *name)
 
 #if OPT_A2
 	proc->p_id = (pid_t)getAvailablePID();
-	if(proc->id!=-1)
+	if(proc->p_id!=-1)
 	{
 		process_table[(int)proc->p_id] = proc;
 	}
