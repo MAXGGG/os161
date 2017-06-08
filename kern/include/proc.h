@@ -83,8 +83,8 @@ struct proc {
 
 	/* add more material here as needed */
 	#if OPT_A2
-	struct pid_t p_id;
-	struct pid_t parent;
+	pid_t p_id;
+	pid_t parent;
 	int p_exitcode;
 	int p_state;
 	#endif
