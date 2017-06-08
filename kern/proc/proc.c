@@ -41,9 +41,7 @@
  * Unless you're implementing multithreaded user processes, the only
  * process that will have more than one thread is the kernel process.
  */
-#if OPT_A2
-#define PROCINLINE
-#endif
+#define PARRAYINLINE
 
 #include <types.h>
 #include <proc.h>
