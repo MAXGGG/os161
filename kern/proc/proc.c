@@ -84,14 +84,14 @@ struct lock *table_lock;
 int
 getAvailablePID()
 {	int retval = -1;
-	lock_acquire(table_lock);
+	// lock_acquire(table_lock);
 	for(int i=PID_MIN;i<=PID_MAX;++i){
 		if(process_table[i]==NULL){
 			retval = i;
 			break;
 		}
 	}
-	lock_release(table_lock);
+	// lock_release(table_lock);
 	return retval;
 }
 #endif
