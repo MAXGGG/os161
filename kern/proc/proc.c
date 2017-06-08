@@ -79,14 +79,14 @@ struct semaphore *no_proc_sem;
 #endif  // UW
 
 #if OPT_A2
-int p_id_array[PID_MAX] = {0};
+static struct parray process_table;
 
 pid_t
 getAvailablePID()
 {
-	for(int i=PID_MIN;i<=PID_MAX;++i){
-		if(p_id_array[i]==0){
-			p_id_array[i] = 1;
+	for(int i=PID_MIN;i<=parray_num(process_table);++i){
+		struct proc * p = parray_get(process_table, i);
+		if(p!=NULL){
 			return (pid_t)i;
 		}
 	}
@@ -129,6 +129,7 @@ proc_create(const char *name)
 
 #if OPT_A2
 	proc->p_id = getAvailablePID();
+	parray_set(process_table,(unsigned)proc->p_id, proc);
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
 #endif
@@ -214,9 +215,9 @@ proc_destroy(struct proc *proc)
 	V(proc_count_mutex);
 #endif // UW
 
-// #if OPT_A2
-// 	p_id_array[(int)proc->p_id] = 0;
-// #endif
+#if OPT_A2
+	parray_set(process_table, (unsigned)proc->p_id, NULL);
+#endif
 
 
 }
@@ -242,6 +243,11 @@ proc_bootstrap(void)
     panic("could not create no_proc_sem semaphore\n");
   }
 #endif // UW
+
+#if OPT_A2
+	parray_init(process_table);
+	parray_setsize(process_table, PID_MAX);
+#endif
 }
 
 /*
