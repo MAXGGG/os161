@@ -141,8 +141,8 @@ proc_create(const char *name)
 	}
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
-	p_cv_lock = lock_create("p_cv_lock");
-	p_cv = cv_create("p_cv");
+	proc->p_cv_lock = lock_create("p_cv_lock");
+	proc->p_cv = cv_create("p_cv");
 #endif
 
 	return proc;
@@ -176,8 +176,8 @@ proc_destroy(struct proc *proc)
 	 DEBUG(DB_EXEC, "*********ELF: p id  %lu is released \n",
 	(unsigned long) proc->p_id);
 	 	process_table[(int)proc->p_id] = NULL;
-		lock_destroy(p_cv_lock);
-		cv_destroy(p_cv);
+		lock_destroy(proc->p_cv_lock);
+		cv_destroy(proc->p_cv);
 	 #endif
 
 	/* VFS fields */
