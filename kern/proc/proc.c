@@ -54,6 +54,11 @@
 #include <kern/fcntl.h>
 #include "opt-A2.h"
 
+#if OPT_A2
+#include <array.h>
+#include <limits.h>
+#endif
+
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
