@@ -257,10 +257,10 @@ proc_bootstrap(void)
     panic("could not create no_proc_sem semaphore\n");
   }
 #endif // UW
-// #if OPT_A2
-// 	table_lock = lock_create("table_lock");
-// 	KASSERT(table_lock!=NULL);
-// #endif
+#if OPT_A2
+	table_lock = lock_create("table_lock");
+	KASSERT(table_lock!=NULL);
+#endif
 }
 
 /*
