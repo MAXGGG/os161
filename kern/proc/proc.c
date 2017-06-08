@@ -244,10 +244,10 @@ proc_bootstrap(void)
   }
 #endif // UW
 
-#if OPT_A2
-	parray_init(&process_table);
-	parray_setsize(&process_table, PID_MAX);
-#endif
+// #if OPT_A2
+// 	parray_init(&process_table);
+// 	parray_setsize(&process_table, PID_MAX);
+// #endif
 }
 
 /*
