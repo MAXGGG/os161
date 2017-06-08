@@ -129,6 +129,8 @@ proc_create(const char *name)
 	proc->p_id = (pid_t)getAvailablePID();
 	if(proc->p_id!=-1)
 	{
+		DEBUG(DB_EXEC, "ELF: p id is  %lu\n", 
+     (unsigned long) proc->p_id);
 		process_table[(int)proc->p_id] = proc;
 	}
 	proc->p_state = 1;
