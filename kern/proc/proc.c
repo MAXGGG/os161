@@ -127,12 +127,12 @@ proc_create(const char *name)
 	proc->console = NULL;
 #endif // UW
 
-#if OPT_A2
-	proc->p_id = getAvailablePID();
-	parray_set(&process_table,(unsigned)proc->p_id, proc);
-	proc->p_state = 1;
-	proc->parent = (pid_t)-1;
-#endif
+// #if OPT_A2
+// 	proc->p_id = getAvailablePID();
+// 	parray_set(&process_table,(unsigned)proc->p_id, proc);
+// 	proc->p_state = 1;
+// 	proc->parent = (pid_t)-1;
+// #endif
 
 	return proc;
 }
@@ -215,9 +215,9 @@ proc_destroy(struct proc *proc)
 	V(proc_count_mutex);
 #endif // UW
 
-#if OPT_A2
-	parray_set(&process_table, (unsigned)proc->p_id, NULL);
-#endif
+// #if OPT_A2
+// 	parray_set(&process_table, (unsigned)proc->p_id, NULL);
+// #endif
 
 
 }
