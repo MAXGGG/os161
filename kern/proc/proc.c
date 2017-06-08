@@ -128,7 +128,7 @@ proc_create(const char *name)
 #endif // UW
 
 #if OPT_A2
-	proc->p_id = getAvailablePID();
+	// proc->p_id = getAvailablePID();
 	// parray_set(&process_table,(unsigned)proc->p_id, proc);
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
