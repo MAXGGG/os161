@@ -214,9 +214,9 @@ proc_destroy(struct proc *proc)
 	V(proc_count_mutex);
 #endif // UW
 
-#if OPT_A2
-	p_id_array[(int)proc->p_id] = 0;
-#endif
+// #if OPT_A2
+// 	p_id_array[(int)proc->p_id] = 0;
+// #endif
 
 
 }
