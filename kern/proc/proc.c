@@ -129,7 +129,7 @@ proc_create(const char *name)
 
 #if OPT_A2
 	proc->p_id = getAvailablePID();
-	// parray_set(&process_table,0, proc);
+	// parray_set(&process_table,(unsigned)proc->p_id, proc);
 	proc->p_state = 1;
 	proc->parent = (pid_t)-1;
 #endif
@@ -244,10 +244,10 @@ proc_bootstrap(void)
   }
 #endif // UW
 
-// #if OPT_A2
-// 	parray_init(&process_table);
-// 	parray_setsize(&process_table, PID_MAX);
-// #endif
+#if OPT_A2
+	parray_init(&process_table);
+	parray_setsize(&process_table, PID_MAX);
+#endif
 }
 
 /*
