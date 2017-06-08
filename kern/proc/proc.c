@@ -84,7 +84,7 @@ static struct parray process_table;
 pid_t
 getAvailablePID()
 {
-	for(int i=PID_MIN;i<=parray_num(process_table);++i){
+	for(unsigned i=PID_MIN;i<=parray_num(process_table);++i){
 		struct proc * p = parray_get(process_table, i);
 		if(p!=NULL){
 			return (pid_t)i;
