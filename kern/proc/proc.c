@@ -146,7 +146,7 @@ proc_create(const char *name)
 	}
 	parray_init(&proc->p_children);
 	proc->p_state = 1;
-	proc->parent = NULL;
+	proc->p_parent = NULL;
 	proc->p_cv_lock = lock_create("p_cv_lock");
 	proc->p_cv = cv_create("p_cv");
 #endif
@@ -181,7 +181,7 @@ proc_destroy(struct proc *proc)
 	 #if OPT_A2
 	 //remove proc from its parent children array
 	 if(proc->p_parent!=NULL){
-		 spinlock_acquire(proc->parent->p_lock);
+		 spinlock_acquire(proc->p_parent->p_lock);
 		 for(unsigned i=0;i<parray_num(&proc->p_parent->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_parent->p_children, i);
 			 if(c==proc){
@@ -189,7 +189,7 @@ proc_destroy(struct proc *proc)
 				 break;
 			 }
 		 }
-		 spinlock_release(proc->parent->p_lock);
+		 spinlock_release(proc->p_parent->p_lock);
 	 }
 	 //remove proc's children
 	 if(parray_num(&proc->p_children)>0){
