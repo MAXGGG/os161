@@ -131,20 +131,22 @@ proc_create(const char *name)
 
 #if OPT_A2
 	if(name!="[kernel]"){
-	proc->p_id = (pid_t)getAvailablePID();
-	if(proc->p_id!=-1)
-	{
-		DEBUG(DB_EXEC, "*********ELF: p id %lu is created\n",
-     (unsigned long) proc->p_id);
-	  lock_acquire(table_lock);
-		process_table[(int)proc->p_id] = proc;
-		lock_release(table_lock);
-	}}else{
+		proc->p_id = (pid_t)getAvailablePID();
+		if(proc->p_id!=-1)
+		{
+			DEBUG(DB_EXEC, "*********ELF: p id %lu is created\n",
+     		(unsigned long) proc->p_id);
+	  		lock_acquire(table_lock);
+			process_table[(int)proc->p_id] = proc;
+			lock_release(table_lock);
+		}
+	}else{
 		proc->p_id = PID_MIN;
 		process_table[PID_MIN] = proc;
 	}
+	parray_init(&proc->p_children);
 	proc->p_state = 1;
-	proc->parent = (pid_t)-1;
+	proc->parent = NULL;
 	proc->p_cv_lock = lock_create("p_cv_lock");
 	proc->p_cv = cv_create("p_cv");
 #endif
@@ -177,6 +179,27 @@ proc_destroy(struct proc *proc)
 	 */
 
 	 #if OPT_A2
+	 //remove proc from its parent children array
+	 if(proc->p_parent!=NULL){
+		 spinlock_acquire(proc->parent->p_lock);
+		 for(unsigned i=0;i<parray_num(&proc->p_parent->p_children);++i){
+			 struct proc *c = parray_get(&proc->p_parent->p_children, i);
+			 if(c==proc){
+				 parray_set(&proc->p_parent->p_children, i, NULL);
+				 break;
+			 }
+		 }
+		 spinlock_release(proc->parent->p_lock);
+	 }
+	 //remove proc's children
+	 if(parray_num(&proc->p_children)>0){
+		 spinlock_acquire(proc->p_lock);
+		 for(unsigned i=0;i<parray_num(&proc->p_children);++i){
+			 struct proc *c = parray_get(&proc->p_children, i);
+			 c->p_parent = NULL;
+		 }
+		 spinlock_release(proc->p_lock);
+	 }
 	 DEBUG(DB_EXEC, "*********ELF: p id  %lu is released \n",
 	(unsigned long) proc->p_id);
 	 	process_table[(int)proc->p_id] = NULL;
@@ -249,7 +272,6 @@ proc_bootstrap(void)
 	#if OPT_A2
 		table_lock = lock_create("table_lock");
 		KASSERT(table_lock!=NULL);
-		DEBUG(DB_EXEC, "*********lock created");
 	#endif
   kproc = proc_create("[kernel]");
   if (kproc == NULL) {

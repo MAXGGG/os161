@@ -81,11 +81,12 @@ struct proc {
 	/* add more material here as needed */
 	#if OPT_A2
 	pid_t p_id;
-	pid_t parent;
+ 	struct proc *p_parent;
 	int p_exitcode;
 	int p_state;
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
+	struct parray p_children;
 	#endif
 };
 
