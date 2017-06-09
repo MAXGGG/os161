@@ -181,7 +181,7 @@ proc_destroy(struct proc *proc)
 	 #if OPT_A2
 	 //remove proc from its parent children array
 	 if(proc->p_parent!=NULL){
-		 spinlock_acquire(proc->p_parent->p_lock);
+		 spinlock_acquire(&proc->p_parent->p_lock);
 		 for(unsigned i=0;i<parray_num(&proc->p_parent->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_parent->p_children, i);
 			 if(c==proc){
@@ -189,16 +189,16 @@ proc_destroy(struct proc *proc)
 				 break;
 			 }
 		 }
-		 spinlock_release(proc->p_parent->p_lock);
+		 spinlock_release(&proc->p_parent->p_lock);
 	 }
 	 //remove proc's children
 	 if(parray_num(&proc->p_children)>0){
-		 spinlock_acquire(proc->p_lock);
+		 spinlock_acquire(&proc->p_lock);
 		 for(unsigned i=0;i<parray_num(&proc->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_children, i);
 			 c->p_parent = NULL;
 		 }
-		 spinlock_release(proc->p_lock);
+		 spinlock_release(&proc->p_lock);
 	 }
 	 DEBUG(DB_EXEC, "*********ELF: p id  %lu is released \n",
 	(unsigned long) proc->p_id);
