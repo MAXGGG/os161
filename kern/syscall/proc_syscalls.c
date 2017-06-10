@@ -118,9 +118,14 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    if(result==ENOMEM){
       return ENOMEM;
    }
-   struct addrspace *oldas = curproc_setas(newaddr);
-   as_activate();
 
+   spinlock_acquire(&newp->p_lock);
+ 	struct addrspace oldas = newp->p_addrspace;
+ 	newp->p_addrspace = newaddr;
+ 	spinlock_release(&newp->p_lock);
+
+   as_destroy(oldas);
+   
    newp->p_parent = currentproc;
    parray_add(&currentproc->p_children, newp, NULL);
 
