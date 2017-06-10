@@ -120,7 +120,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    }
    struct addrspace *oldas = curproc_setas(newaddr);
    as_activate();
-   as_destroy(oldas);
+
    newp->p_parent = currentproc;
    parray_add(&currentproc->p_children, newp, NULL);
 
