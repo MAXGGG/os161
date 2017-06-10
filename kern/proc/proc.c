@@ -134,8 +134,6 @@ proc_create(const char *name)
 		proc->p_id = (pid_t)getAvailablePID();
 		if(proc->p_id!=-1)
 		{
-			DEBUG(DB_EXEC, "*********ELF: p id %lu is created\n",
-     		(unsigned long) proc->p_id);
 	  		lock_acquire(table_lock);
 			process_table[(int)proc->p_id] = proc;
 			lock_release(table_lock);
@@ -200,7 +198,6 @@ proc_destroy(struct proc *proc)
 		 }
 		 spinlock_release(&proc->p_lock);
 	 }
-	 DEBUG(DB_EXEC, "*********ELF: p id  %lu is released \n",
 	(unsigned long) proc->p_id);
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
