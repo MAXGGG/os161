@@ -122,7 +122,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    as_activate();
    as_destroy(oldas);
    newp->p_parent = currentproc;
-   parray_add(currentproc->children, newp, NULL);
+   parray_add(currentproc->p_children, newp, NULL);
 
    struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
    memcpy(newtf, tf, sizeof(struct trapframe));
@@ -132,7 +132,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
       return errno;
    }
 
-   retval = newp->p_id;
+   *retval = newp->p_id;
 
    return 0;
 }
