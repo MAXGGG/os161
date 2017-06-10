@@ -9,6 +9,7 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include <mips/trapframe.h>
 #include "opt-A2.h"
 
   /* this implementation of sys__exit does not do anything with the exit code */
@@ -113,11 +114,11 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    if(newaddr==NULL){
       return ENOMEM;
    }
-   int result = as_copy(currentproc->p_addrspace, *newaddr);
+   int result = as_copy(currentproc->p_addrspace, &newaddr);
    if(result==ENOMEM){
       return ENOMEM;
    }
-   struct addrspace *oldas = curproc_getas(newaddr);
+   struct addrspace *oldas = curproc_setas(newaddr);
    as_activate();
    as_destroy(oldas);
    newp->p_parent = currentproc;
@@ -126,12 +127,12 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
    memcpy(newtf, tf, sizeof(struct trapframe));
 
-   int errno = thread_fork(curthread->t_name, newp, $enter_forked_process, newtf, 0);
+   int errno = thread_fork(curthread->t_name, newp, &enter_forked_process, newtf, 0);
    if(errno){
       return errno;
    }
 
-   retval = newp->p_id; 
+   retval = newp->p_id;
 
    return 0;
 }
