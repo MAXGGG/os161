@@ -98,3 +98,41 @@ sys_waitpid(pid_t pid,
   *retval = pid;
   return(0);
 }
+
+#if OPT_A2
+int
+sys_fork(struct trapframe *tf, pid_t *retval)
+{
+   KASSERT(curproc!=NULL);
+   struct proc *currentproc = curproc;
+   struct proc *newp = proc_create_runprogram(currentproc->p_name);
+   if(newp==NULL){
+      return ENOMEM;
+   }
+   struct addrspace *newaddr = as_create();
+   if(newaddr==NULL){
+      return ENOMEM;
+   }
+   int result = as_copy(currentproc->p_addrspace, *newaddr);
+   if(result==ENOMEM){
+      return ENOMEM;
+   }
+   struct addrspace *oldas = curproc_getas(newaddr);
+   as_activate();
+   as_destroy(oldas);
+   newp->p_parent = currentproc;
+   parray_add(currentproc->children, newp, NULL);
+
+   struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
+   memcpy(newtf, tf, sizeof(struct trapframe));
+
+   int errno = thread_fork(curthread->t_name, newp, $enter_forked_process, newtf, 0);
+   if(errno){
+      return errno;
+   }
+
+   retval = newp->p_id; 
+
+   return 0;
+}
+#endif
