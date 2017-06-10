@@ -199,8 +199,9 @@ syscall(struct trapframe *tf)
 	}
  #else
 void
-enter_forked_process(struct trapframe *tf)
+enter_forked_process(void* data1, unsigned long data2)
 {
-	(void)tf;
+	(void)data1;
+	(void)data2;
 }
 #endif
