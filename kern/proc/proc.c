@@ -198,7 +198,6 @@ proc_destroy(struct proc *proc)
 		 }
 		 spinlock_release(&proc->p_lock);
 	 }
-	(unsigned long) proc->p_id);
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
 		cv_destroy(proc->p_cv);
