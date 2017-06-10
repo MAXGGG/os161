@@ -187,15 +187,22 @@ syscall(struct trapframe *tf)
  	void
 	enter_forked_process(void* data1, unsigned long data2)
 	{
-		(void)data2;
-		struct trapfram *tf = data1;
-		struct trapfram localtf = *tf;
+		struct trapframe *ftf = data1;
+	struct trapframe otf = *ftf;
 
-		localtf.tf_vo = 0;
-		localtf.tf_a3 = 0;
-		localtf.tf_epc += 4;
+	(void) data2;
 
-		mips_usermode(&localtf);
+	otf.tf_v0 = 0;
+	otf.tf_a3 = 0;
+	otf.tf_epc += 4;
+
+	kfree(ftf);
+
+	KASSERT(curthread->t_curspl == 0);
+	/* ...or leak any spinlocks */
+	KASSERT(curthread->t_iplhigh_count == 0);
+
+	mips_usermode(&otf);
 
 	}
  #else
