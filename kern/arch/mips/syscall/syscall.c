@@ -191,7 +191,7 @@ syscall(struct trapframe *tf)
 		struct trapframe *tf = data1;
 		struct trapframe localtf = *tf;
 
-		localtf.tf_vo = 0;
+		localtf.tf_v0 = 0;
 		localtf.tf_a3 = 0;
 		localtf.tf_epc += 4;
 
