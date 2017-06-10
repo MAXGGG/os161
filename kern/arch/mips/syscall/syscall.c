@@ -35,6 +35,7 @@
 #include <thread.h>
 #include <current.h>
 #include <syscall.h>
+#include "opt-A2.h"
 
 
 /*
@@ -132,11 +133,11 @@ syscall(struct trapframe *tf)
 #endif // UW
 
 	    /* Add stuff here */
-		 #if OPT_A2
-		 case SYS_fork:
-		 sys_fork(tf, (int *)(&retval));
-		 break;
-		 #endif
+#if OPT_A2
+	case SYS_fork:
+		sys_fork(tf, (int *)(&retval));
+		break;
+#endif
 
 	default:
 	  kprintf("Unknown syscall %d\n", callno);
