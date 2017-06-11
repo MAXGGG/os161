@@ -166,7 +166,7 @@ proc_destroy(struct proc *proc)
          * be defined because the calling thread may have already detached itself
          * from the process.
 	 */
-
+	 DEBUG(DB_EXEC, "destroy 1\n");
 	KASSERT(proc != NULL);
 	KASSERT(proc != kproc);
 
@@ -189,6 +189,7 @@ proc_destroy(struct proc *proc)
 		 }
 		 spinlock_release(&proc->p_parent->p_lock);
 	 }
+	  DEBUG(DB_EXEC, "destroy 2\n");
 	 //remove proc's children
 	 if(parray_num(&proc->p_children)>0){
 		 spinlock_acquire(&proc->p_lock);
@@ -198,6 +199,7 @@ proc_destroy(struct proc *proc)
 		 }
 		 spinlock_release(&proc->p_lock);
 	 }
+	  DEBUG(DB_EXEC, "destroy 3\n");
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
 		cv_destroy(proc->p_cv);
