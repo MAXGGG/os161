@@ -131,7 +131,9 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    as_destroy(oldas);
 
    newp->p_parent = currentproc;
-   parray_add(&currentproc->p_children, newp, NULL);
+   int v = parray_add(&currentproc->p_children, newp, NULL);
+   DEBUG(DB_EXEC, "parry size is lasdlldld %lu \n",
+ (unsigned long)v );
 
    struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
    memcpy(newtf, tf, sizeof(struct trapframe));
