@@ -191,10 +191,10 @@ proc_destroy(struct proc *proc)
 	 }
 	  DEBUG(DB_EXEC, "destroy 2\n");
 	 //remove proc's children
+	 		 spinlock_acquire(&proc->p_lock);
 	 if(parray_num(&proc->p_children)>0){
 		 DEBUG(DB_EXEC, "parry size is lasdlldld %lu \n",
 	  (unsigned long)parray_num(&proc->p_children) );
-		 spinlock_acquire(&proc->p_lock);
 		 struct proc *c = parray_get(&proc->p_children, 0);
 		 KASSERT(c!=NULL);
 		//  for(unsigned i=0;i<parray_num(&proc->p_children);++i){
@@ -202,8 +202,8 @@ proc_destroy(struct proc *proc)
 		// 	 KASSERT(c!=NULL);
 		// 	 c->p_parent = NULL;
 		//  }
-		 spinlock_release(&proc->p_lock);
 	 }
+	 spinlock_release(&proc->p_lock);
 	  DEBUG(DB_EXEC, "destroy 3\n");
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
