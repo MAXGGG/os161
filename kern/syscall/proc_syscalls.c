@@ -134,7 +134,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    int v = parray_add(&currentproc->p_children, newp, NULL);
    DEBUG(DB_EXEC, "parry index is lasdlldld %lu \n",
  (unsigned long)v );
-   struct proc *test = parry_get(&currentproc->p_children, 0);
+   struct proc *test = parry_get(&currentproc->p_children, (unsigned)0);
    KASSERT(test!=NULL);
 
    struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
