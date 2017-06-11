@@ -194,7 +194,7 @@ proc_destroy(struct proc *proc)
 	 		 spinlock_acquire(&proc->p_lock);
 	 if(parray_num(&proc->p_children)>0){
 		 struct proc* c = parray_get(&proc->p_children, 0);
-		 KASSERT(c!=NULL):
+		 KASSERT(c!=NULL);
 	// 	 DEBUG(DB_EXEC, "parry size is lasdlldld %lu \n",
 	//   (unsigned long)parray_num(&proc->p_children) );
 	// 	 for (unsigned i=0; i<parray_num(&proc->p_children); i++)
