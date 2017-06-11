@@ -135,11 +135,11 @@ syscall(struct trapframe *tf)
 #endif // UW
 
 	    /* Add stuff here */
-		 #if OPT_A2
-		 	case SYS_fork:
-		 		err = sys_fork(tf, (pid_t *)&retval);
-		 		break;
-		 #endif
+#if OPT_A2
+	case SYS_fork:
+		err = sys_fork(tf, (pid_t *)&retval);
+		break;
+#endif
 
 	default:
 	  kprintf("Unknown syscall %d\n", callno);
@@ -205,27 +205,14 @@ syscall(struct trapframe *tf)
 enter_forked_process(void *data1, unsigned long data2)
 {
     (void)data2;
-    struct trapframe *childtf = data1;
-	/* It's necessary for the trap frame used here to be on the
-	* current thread's own stack.
-	*/
-    struct trapframe stacktf = *childtf;
-    // don't need it anymore as long as copy the parent's tf to kernel stack
+    struct trapframe *tf = data1;
+    struct trapframe localtf = *tf;
     kfree(childtf);
 
-	/* Switch to child as and activate it. */
-
-    stacktf.tf_v0 = 0;     // return value = 0 for child proc
-    stacktf.tf_a3 = 0;     // signal no error
-    /**
-     * Now, advance the program counter, to avoid restarting the syscall
-     * over and over again, and finally enter usermode.
-     */
-    stacktf.tf_epc += 4;
+    localtf.tf_v0 = 0;
+    localtf.tf_a3 = 0;
+    localtf.tf_epc += 4;
     mips_usermode(&stacktf);
-
-    /* mips_usermode() does not return */
-    panic("enter_forked_process: unexpected return from mips_usermode()");
 }
  #else
 void
