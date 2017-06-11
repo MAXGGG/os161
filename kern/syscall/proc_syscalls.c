@@ -17,7 +17,7 @@
 
 void sys__exit(int exitcode) {
 
-   DEBUG(DB_SYSCALL, "sys exiting");
+   DEBUG(DB_EXEC, "sys exiting");
 
   struct addrspace *as;
   struct proc *p = curproc;
@@ -25,7 +25,6 @@ void sys__exit(int exitcode) {
      an unused variable */
   (void)exitcode;
 
-  DEBUG(DB_SYSCALL,"Syscall: _exit(%d)\n",exitcode);
 
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
@@ -48,7 +47,7 @@ void sys__exit(int exitcode) {
   proc_destroy(p);
 
   thread_exit();
-  DEBUG(DB_SYSCALL, "sys exit finished");
+  DEBUG(DB_EXEC, "sys exiting finished");
   /* thread_exit() does not return, so we should never get here */
   panic("return from thread_exit in sys_exit\n");
 }
