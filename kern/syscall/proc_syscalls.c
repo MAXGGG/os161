@@ -17,7 +17,7 @@
 
 void sys__exit(int exitcode) {
 
-   DEBUG(DB_EXEC, "sys exiting");
+   DEBUG(DB_EXEC, "sys exiting 1\n");
 
   struct addrspace *as;
   struct proc *p = curproc;
@@ -25,7 +25,7 @@ void sys__exit(int exitcode) {
      an unused variable */
   (void)exitcode;
 
-
+DEBUG(DB_EXEC, "sys exiting 2\n");
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
   /*
@@ -35,19 +35,21 @@ void sys__exit(int exitcode) {
    * half-destroyed address space. This tends to be
    * messily fatal.
    */
+   DEBUG(DB_EXEC, "sys exiting 3\n");
   as = curproc_setas(NULL);
   as_destroy(as);
 
   /* detach this thread from its process */
   /* note: curproc cannot be used after this call */
   proc_remthread(curthread);
-
+  DEBUG(DB_EXEC, "sys exiting 4\n");
   /* if this is the last user process in the system, proc_destroy()
      will wake up the kernel menu thread */
   proc_destroy(p);
+  DEBUG(DB_EXEC, "sys exiting 5\n");
 
   thread_exit();
-  DEBUG(DB_EXEC, "sys exiting finished");
+  DEBUG(DB_EXEC, "sys exiting finished\n");
   /* thread_exit() does not return, so we should never get here */
   panic("return from thread_exit in sys_exit\n");
 }
