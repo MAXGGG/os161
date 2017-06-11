@@ -195,6 +195,7 @@ proc_destroy(struct proc *proc)
 		 spinlock_acquire(&proc->p_lock);
 		 for(unsigned i=0;i<parray_num(&proc->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_children, i);
+			 KASSERT(c!=NULL);
 			 c->p_parent = NULL;
 		 }
 		 spinlock_release(&proc->p_lock);
