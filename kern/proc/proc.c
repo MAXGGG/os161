@@ -192,6 +192,8 @@ proc_destroy(struct proc *proc)
 	  DEBUG(DB_EXEC, "destroy 2\n");
 	 //remove proc's children
 	 if(parray_num(&proc->p_children)>0){
+		 DEBUG(DB_EXEC, "parry size is lasdlldld %lu \n",
+	  (unsigned long)parray_num(&proc->p_children) );
 		 spinlock_acquire(&proc->p_lock);
 		 for(unsigned i=0;i<parray_num(&proc->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_children, i);
