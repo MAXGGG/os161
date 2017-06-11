@@ -166,7 +166,6 @@ proc_destroy(struct proc *proc)
          * be defined because the calling thread may have already detached itself
          * from the process.
 	 */
-	 DEBUG(DB_EXEC, "destroy 1\n");
 	KASSERT(proc != NULL);
 	KASSERT(proc != kproc);
 
@@ -183,27 +182,26 @@ proc_destroy(struct proc *proc)
 		 for(unsigned i=0;i<parray_num(&proc->p_parent->p_children);++i){
 			 struct proc *c = parray_get(&proc->p_parent->p_children, i);
 			 if(c==proc){
-				 parray_set(&proc->p_parent->p_children, i, NULL);
+				 parray_remove(&proc->p_parent->p_children, i);
 				 break;
 			 }
 		 }
 		 spinlock_release(&proc->p_parent->p_lock);
 	 }
-	  DEBUG(DB_EXEC, "destroy 2\n");
+
 	 //remove proc's children
-	 		 spinlock_acquire(&proc->p_lock);
+	 spinlock_acquire(&proc->p_lock);
 	 if(parray_num(&proc->p_children)>0){
-		 DEBUG(DB_EXEC, "pid is lasdlldld %lu \n",
-	  (unsigned long)&proc->p_children->v[0]->p_id );
-		//  for (unsigned i=0; i<parray_num(&proc->p_children); i++)
- 	// 	{
- 	// 		struct proc *child = parray_get(&proc->p_children, i);
- 	// 		KASSERT(child != NULL);
- 	// 		child->p_parent = NULL;
- 	// 	}
+		for (unsigned i=0; i<parray_num(&proc->p_children); i++)
+ 		{
+ 			struct proc *child = parray_get(&proc->p_children, i);
+ 			KASSERT(child != NULL);
+ 			child->p_parent = NULL;
+ 		}
 	 }
 	 spinlock_release(&proc->p_lock);
-	  DEBUG(DB_EXEC, "destroy 3\n");
+
+
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
 		cv_destroy(proc->p_cv);
