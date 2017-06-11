@@ -212,7 +212,7 @@ enter_forked_process(void *data1, unsigned long data2)
     localtf.tf_v0 = 0;
     localtf.tf_a3 = 0;
     localtf.tf_epc += 4;
-    mips_usermode(&stacktf);
+    mips_usermode(&localtf);
 }
  #else
 void
