@@ -36,8 +36,10 @@ void sys__exit(int exitcode) {
   // lock_acquire(p->p_parent->p_cv_lock);
   // cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
   // lock_release(p->p_parent->p_cv_lock);
+  // #else
+  // (void)exitcode;
   // #endif
-
+ (void)exitcode;
 // DEBUG(DB_EXEC, "sys exiting 2\n");
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
