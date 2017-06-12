@@ -199,14 +199,14 @@ proc_destroy(struct proc *proc)
 	 }
 	 spinlock_release(&proc->p_lock);
 
-	 if(proc->parent==NULL){
+	 if(proc->p_parent==NULL){
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
 		cv_destroy(proc->p_cv);
 	}
 	 #endif
 #if OPT_A2
-if(proc->parent==NULL){
+if(proc->p_parent==NULL){
 #endif
 	/* VFS fields */
 	if (proc->p_cwd) {
