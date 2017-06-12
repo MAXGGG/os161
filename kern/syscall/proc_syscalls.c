@@ -34,7 +34,7 @@ void sys__exit(int exitcode) {
   p->p_state = 1;
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   if(p->p_parent!=NULL){
-     p->parent->p_child_count--;
+    p->p_parent->p_child_count--;
     lock_acquire(p->p_parent->p_cv_lock);
     cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
     lock_release(p->p_parent->p_cv_lock);
@@ -124,7 +124,7 @@ sys_waitpid(pid_t pid,
   }
   lock_acquire(parent->p_cv_lock);
   while(child->p_state!=1){
-     DEBUG(DB_EXEC,"wating on salal :%i \n", (int))pid;
+     DEBUG(DB_EXEC,"wating on salal :%i \n", child->p_state);
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
   lock_release(parent->p_cv_lock);
