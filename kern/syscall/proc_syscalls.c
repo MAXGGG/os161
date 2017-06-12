@@ -124,12 +124,12 @@ sys_waitpid(pid_t pid,
   }
   // parent->waitdone = 1;
   lock_acquire(parent->p_cv_lock);
-  DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
+  // DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
   while(child->p_state!=1){
      DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
-  DEBUG(DB_EXEC,"pid: %d is released \n",(int)parent->p_id);
+  // DEBUG(DB_EXEC,"pid: %d is released \n",(int)parent->p_id);
   lock_release(parent->p_cv_lock);
   exitstatus = child->p_exitcode;
   #else
