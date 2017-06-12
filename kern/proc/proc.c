@@ -42,7 +42,7 @@
  * process that will have more than one thread is the kernel process.
  */
 #define PARRAYINLINE
-#define CARRAYINLINE
+#define CHILDRENINLINE
 
 #include <types.h>
 #include <proc.h>
