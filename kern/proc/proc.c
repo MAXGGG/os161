@@ -97,7 +97,7 @@ getAvailablePID()
 
 struct proc*
 getProcessById(pid_t id){
-	return process_table[(int)id]
+	return process_table[(int)id];
 }
 #endif
 
