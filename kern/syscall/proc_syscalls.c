@@ -23,11 +23,24 @@ void sys__exit(int exitcode) {
   struct proc *p = curproc;
   /* for now, just include this to keep the compiler from complaining about
      an unused variable */
-  (void)exitcode;
+  #if OPT_A2
+  // lock_acquire(p->p_cv_lock);
+  // while(parray_num(&p->p_children)>0){
+  //     cv_wait(p->p_cv, p->p_cv_lock);
+  // }
+  // lock_release(p->p_cv_lock);
+
+  p->p_state = 1;
+  p->p_exitcode = _MKWAIT_EXIT(exitcode);
+  lock_acquire(proc->p_parent->p_cv_lock);
+  cv_broadcast(proc->p_parent->p_cv, proc->p_parent->p_cv_lock);
+  lock_release(proc->p_parent->p_cv_lock);
+  #endif
 
 // DEBUG(DB_EXEC, "sys exiting 2\n");
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
+
   /*
    * clear p_addrspace before calling as_destroy. Otherwise if
    * as_destroy sleeps (which is quite possible) when we
@@ -94,6 +107,22 @@ sys_waitpid(pid_t pid,
   if (options != 0) {
     return(EINVAL);
   }
+  #if OPT_A2
+  struct proc* parent = curproc;
+  struct proc *child = process_table[(int)pid];
+  if(child==NULL){
+     return ECHILD;
+  }
+  if(child->p_parent!=parent){
+     return ECHILD;
+  }
+  lock_acquire(parent->p_cv_lock);
+  while(child->p_state!=1){
+     cv_wait(parent->p_cv, parent->p_cv_lock);
+  }
+  lock_release(parent->p_cv_lock);
+  exitstatus = child->p_exitcode;
+  #else
   /* for now, just pretend the exitstatus is 0 */
   exitstatus = 0;
   result = copyout((void *)&exitstatus,status,sizeof(int));
@@ -101,6 +130,7 @@ sys_waitpid(pid_t pid,
     return(result);
   }
   *retval = pid;
+  #endif;
   return(0);
 }
 
@@ -131,11 +161,8 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    as_destroy(oldas);
 
    newp->p_parent = currentproc;
-   int v = parray_add(&currentproc->p_children, newp, NULL);
-   DEBUG(DB_EXEC, "parry index is lasdlldld %lu \n",
- (unsigned long)v );
-   struct proc *test = parray_get(&currentproc->p_children, 0);
-   KASSERT(test!=NULL);
+   parray_add(&currentproc->p_children, newp, NULL);
+   curproc->p_child_count++;
 
    struct trapframe *newtf = kmalloc(sizeof(struct trapframe));
    memcpy(newtf, tf, sizeof(struct trapframe));

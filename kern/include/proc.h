@@ -83,7 +83,8 @@ struct proc {
 	pid_t p_id;
  	struct proc *p_parent;
 	int p_exitcode;
-	int p_state;
+	int p_state; //o running, 1 exited
+	int p_child_count;
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
 	struct parray p_children;

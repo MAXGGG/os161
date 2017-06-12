@@ -143,8 +143,9 @@ proc_create(const char *name)
 		process_table[PID_MIN] = proc;
 	}
 	parray_init(&proc->p_children);
-	proc->p_state = 1;
+	proc->p_state = 0;
 	proc->p_parent = NULL;
+	proc->p_child_count = 0;
 	proc->p_cv_lock = lock_create("p_cv_lock");
 	proc->p_cv = cv_create("p_cv");
 #endif
@@ -176,17 +177,10 @@ proc_destroy(struct proc *proc)
 	 */
 
 	 #if OPT_A2
-	 //remove proc from its parent children array
+	 //signal parent
+	 proc->p_state = 1;
 	 if(proc->p_parent!=NULL){
-		 spinlock_acquire(&proc->p_parent->p_lock);
-		 for(unsigned i=0;i<parray_num(&proc->p_parent->p_children);++i){
-			 struct proc *c = parray_get(&proc->p_parent->p_children, i);
-			 if(c==proc){
-				 parray_remove(&proc->p_parent->p_children, i);
-				 break;
-			 }
-		 }
-		 spinlock_release(&proc->p_parent->p_lock);
+		 proc->p_parent->p_child_count--;
 	 }
 
 	 //remove proc's children
