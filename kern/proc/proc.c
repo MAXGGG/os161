@@ -197,12 +197,16 @@ proc_destroy(struct proc *proc)
 
 	 //remove proc's children
 	 spinlock_acquire(&proc->p_lock);
-	 while(carray_num(&proc->p_children_status)>0){
-		 struct childrenStatus* cs = carray_get(&proc->p_children_status, 0);
-		 KASSERT(cs!=NULL);
-		 struct proc* child = getProcessById(cs->p_id);
-		 if(child!=NULL) child->p_parent = NULL;
+	 if(carray_num(&proc->p_children_status)>0){
+		for (unsigned i=0; i<carray_num(&proc->p_children_status); i++)
+ 		{
+ 			struct childrenStatus *cs = carray_get(&proc->p_children_status, i);
+ 			KASSERT(cs != NULL);
+			struct proc* child = getProcessById(cs->p_id);
+			if(child!=NULL) child->p_parent = NULL;
+ 		}
 	 }
+
 	 spinlock_release(&proc->p_lock);
 
 	 process_table[(int)proc->p_id] = NULL;
