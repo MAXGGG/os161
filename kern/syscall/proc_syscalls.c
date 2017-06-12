@@ -130,7 +130,7 @@ sys_waitpid(pid_t pid,
     return(result);
   }
   *retval = pid;
-  #endif;
+  #endif
   return(0);
 }
 
@@ -176,3 +176,4 @@ sys_fork(struct trapframe *tf, pid_t *retval)
 
    return 0;
 }
+#endif
