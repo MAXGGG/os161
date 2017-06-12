@@ -68,7 +68,7 @@ struct semaphore;
 #if OPT_A2
 //pstuff structure to hold things from kfreeing
 struct childrenStatus{
-  pid_t p_pid;
+  pid_t p_id;
   int p_state;
   int p_exitcode;
 };
