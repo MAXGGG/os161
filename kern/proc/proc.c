@@ -184,9 +184,6 @@ proc_destroy(struct proc *proc)
 	 #if OPT_A2
 	 //signal parent
 	 proc->p_state = 1;
-	 if(proc->p_parent!=NULL){
-		 proc->p_parent->p_child_count--;
-	 }
 
 	 //remove proc's children
 	 spinlock_acquire(&proc->p_lock);
