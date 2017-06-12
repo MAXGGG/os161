@@ -104,7 +104,7 @@ getProcessById(pid_t id){
 struct childrenStatus*
 getChildrenByPid(struct proc* parent, pid_t id){
 	for(unsigned i=0;i<carray_num(&parent->p_children_status);++i){
-		struct childrenStatus* cs = carray_get(&parent->p_children, i);
+		struct childrenStatus* cs = carray_get(&parent->p_children_status, i);
 		if(cs->p_id==id){
 			return cs;
 		}
