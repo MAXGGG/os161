@@ -205,7 +205,7 @@ proc_destroy(struct proc *proc)
 		 carray_remove(&proc->p_children_status, 0);
 		 kfree(cs);
 	 }
-	 carrry_destroy(&proc->p_children_status);
+	 carray_destroy(&proc->p_children_status);
 	 spinlock_release(&proc->p_lock);
 
 	 process_table[(int)proc->p_id] = NULL;
