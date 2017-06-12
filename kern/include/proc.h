@@ -57,7 +57,7 @@ struct semaphore;
 #endif // UW
 
 #if OPT_A2
-//pstuff structure to hold things from kfreeing
+//structure to hold children information
 struct childrenStatus{
   pid_t p_id;
   int p_state;
@@ -93,7 +93,7 @@ struct proc {
 	pid_t p_id;
  	struct proc *p_parent;
 	int p_exitcode;
-	int p_state; //o running, 1 exited
+	int p_state; //0 running, 1 exited
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
    struct carray p_children_status;

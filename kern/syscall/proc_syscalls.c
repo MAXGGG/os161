@@ -25,19 +25,19 @@ void sys__exit(int exitcode) {
   /* for now, just include this to keep the compiler from complaining about
      an unused variable */
   #if OPT_A2
-  // lock_acquire(p->p_cv_lock);
-  // while(parray_num(&p->p_children)>0){
-  //     cv_wait(p->p_cv, p->p_cv_lock);
-  // }
-  // lock_release(p->p_cv_lock);
   KASSERT(p!=NULL);
+  //set current process state to exit
   p->p_state = 1;
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   if(p->p_parent!=NULL){
+
+    //save exit information into parent status array
     struct childrenStatus* cs = getChildrenByPid(p->p_parent, p->p_id);
     cs->p_exitcode = _MKWAIT_EXIT(exitcode);
     cs->p_state = 1;
+
     lock_acquire(p->p_parent->p_cv_lock);
+    //wake up parent
     cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
     lock_release(p->p_parent->p_cv_lock);
   }
@@ -45,7 +45,6 @@ void sys__exit(int exitcode) {
   (void)exitcode;
   #endif
 
-// DEBUG(DB_EXEC, "sys exiting 2\n");
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
 
@@ -116,19 +115,24 @@ sys_waitpid(pid_t pid,
     return(EINVAL);
   }
   #if OPT_A2
+
   struct proc *parent = curproc;
   struct childrenStatus *cs = getChildrenByPid(parent, pid);
+
   if(cs==NULL){
      return ECHILD;
   }
-  // parent->waitdone = 1;
+
   lock_acquire(parent->p_cv_lock);
-  // DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
+
+  DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
+  //if child process is still running, block
   while(cs->p_state!=1){
      DEBUG(DB_EXEC,"pid: %d is being blocked \n",(int)parent->p_id);
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
-  // DEBUG(DB_EXEC,"pid: %d is released \n",(int)parent->p_id);
+  DEBUG(DB_EXEC,"pid: %d is released \n",(int)parent->p_id);
+
   lock_release(parent->p_cv_lock);
   exitstatus = cs->p_exitcode;
   #else
@@ -150,13 +154,16 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    KASSERT(curproc!=NULL);
    struct proc *currentproc = curproc;
    struct proc *newp = proc_create_runprogram(currentproc->p_name);
+
    if(newp==NULL){
       return ENOMEM;
    }
+
    struct addrspace *newaddr = as_create();
    if(newaddr==NULL){
       return ENOMEM;
    }
+
    int result = as_copy(currentproc->p_addrspace, &newaddr);
    if(result==ENOMEM){
       return ENOMEM;
@@ -170,6 +177,8 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    as_destroy(oldas);
 
    newp->p_parent = currentproc;
+
+   //create parent children relationship
    struct childrenStatus *cs = kmalloc(sizeof(struct childrenStatus));
    cs->p_id = newp->p_id;
    cs->p_state = 0;

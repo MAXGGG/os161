@@ -186,29 +186,18 @@ syscall(struct trapframe *tf)
  */
 
  #if OPT_A2
- // 	void
-	// enter_forked_process(void* data1, unsigned long data2)
-	// {
-	// 	(void)data2;
-	// 	struct trapframe *tf = data1;
-	// 	struct trapframe localtf = *tf;
-	//
-	// 	localtf.tf_v0 = 0;
-	// 	localtf.tf_a3 = 0;
-	// 	localtf.tf_epc += 4;
-	//
-	// 	mips_usermode(&localtf);
-	//
-	// }
 
-	void
+void
 enter_forked_process(void *data1, unsigned long data2)
 {
     (void)data2;
     struct trapframe *tf = data1;
+
+	 //copy tf to local stack
     struct trapframe localtf = *tf;
     kfree(tf);
 
+	 //set up tf
     localtf.tf_v0 = 0;
     localtf.tf_a3 = 0;
     localtf.tf_epc += 4;

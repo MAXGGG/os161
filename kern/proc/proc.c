@@ -82,6 +82,7 @@ struct semaphore *no_proc_sem;
 static struct proc *process_table[PID_MAX] = {NULL};
 struct lock *table_lock;
 
+//helper function to find next available p id
 int
 getAvailablePID()
 {	int retval = -1;
@@ -96,11 +97,13 @@ getAvailablePID()
 	return retval;
 }
 
+//helper function to find process by id
 struct proc*
 getProcessById(pid_t id){
 	return process_table[(int)id];
 }
 
+//get the childstatus of p id
 struct childrenStatus*
 getChildrenByPid(struct proc* parent, pid_t id){
 	for(unsigned i=0;i<carray_num(&parent->p_children_status);++i){
@@ -111,6 +114,7 @@ getChildrenByPid(struct proc* parent, pid_t id){
 	}
 	return NULL;
 }
+
 #endif
 
 
@@ -156,9 +160,11 @@ proc_create(const char *name)
 			lock_release(table_lock);
 		}
 	}else{
+		//kernel will be the first process and dont need to use lock
 		proc->p_id = PID_MIN;
 		process_table[PID_MIN] = proc;
 	}
+	//init fields
 	carray_init(&proc->p_children_status);
 	proc->p_state = 0;
 	proc->p_parent = NULL;
@@ -195,7 +201,7 @@ proc_destroy(struct proc *proc)
 
 	 #if OPT_A2
 
-	 //remove proc's children
+	 //remove parent children relations
 	 spinlock_acquire(&proc->p_lock);
 	 if(carray_num(&proc->p_children_status)>0){
 		for (unsigned i=0; i<carray_num(&proc->p_children_status); i++)
@@ -209,6 +215,7 @@ proc_destroy(struct proc *proc)
 
 	 spinlock_release(&proc->p_lock);
 
+	 //free pid
 	 process_table[(int)proc->p_id] = NULL;
 	 lock_destroy(proc->p_cv_lock);
 	 cv_destroy(proc->p_cv);
