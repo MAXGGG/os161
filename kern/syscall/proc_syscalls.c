@@ -33,7 +33,7 @@ void sys__exit(int exitcode) {
   KASSERT(p!=NULL);
   p->p_state = 1;
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
-  if(p->parent!=NULL){
+  if(p->p_parent!=NULL){
     lock_acquire(p->p_parent->p_cv_lock);
     cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
     lock_release(p->p_parent->p_cv_lock);
