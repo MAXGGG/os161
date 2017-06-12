@@ -35,7 +35,7 @@ void sys__exit(int exitcode) {
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   if(p->p_parent!=NULL){
     p->p_parent->p_child_count--;
-    struct childrenStatus* cs = getChildrenByPid(&p->p_parent, p->p_id);
+    struct childrenStatus* cs = getChildrenByPid(p->p_parent, p->p_id);
     cs->p_exitcode = _MKWAIT_EXIT(exitcode);
     cs->p_state = 1;
     lock_acquire(p->p_parent->p_cv_lock);
