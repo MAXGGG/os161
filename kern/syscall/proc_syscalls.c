@@ -24,19 +24,19 @@ void sys__exit(int exitcode) {
   struct proc *p = curproc;
   /* for now, just include this to keep the compiler from complaining about
      an unused variable */
-  #if OPT_A2
-  // lock_acquire(p->p_cv_lock);
-  // while(parray_num(&p->p_children)>0){
-  //     cv_wait(p->p_cv, p->p_cv_lock);
-  // }
-  // lock_release(p->p_cv_lock);
-
-  p->p_state = 1;
-  p->p_exitcode = _MKWAIT_EXIT(exitcode);
-  lock_acquire(p->p_parent->p_cv_lock);
-  cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
-  lock_release(p->p_parent->p_cv_lock);
-  #endif
+  // #if OPT_A2
+  // // lock_acquire(p->p_cv_lock);
+  // // while(parray_num(&p->p_children)>0){
+  // //     cv_wait(p->p_cv, p->p_cv_lock);
+  // // }
+  // // lock_release(p->p_cv_lock);
+  //
+  // p->p_state = 1;
+  // p->p_exitcode = _MKWAIT_EXIT(exitcode);
+  // lock_acquire(p->p_parent->p_cv_lock);
+  // cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
+  // lock_release(p->p_parent->p_cv_lock);
+  // #endif
 
 // DEBUG(DB_EXEC, "sys exiting 2\n");
   KASSERT(curproc->p_addrspace != NULL);
