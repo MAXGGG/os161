@@ -184,7 +184,7 @@ proc_destroy(struct proc *proc)
 	 */
 
 	 #if OPT_A2
-	 //signal parent
+
 	 proc->p_state = 1;
 
 	 //remove proc's children
@@ -199,12 +199,15 @@ proc_destroy(struct proc *proc)
 	 }
 	 spinlock_release(&proc->p_lock);
 
-
+	 if(proc->parent==NULL){
 	 	process_table[(int)proc->p_id] = NULL;
 		lock_destroy(proc->p_cv_lock);
 		cv_destroy(proc->p_cv);
+	}
 	 #endif
-
+#if OPT_A2
+if(proc->parent==NULL){
+#endif
 	/* VFS fields */
 	if (proc->p_cwd) {
 		VOP_DECREF(proc->p_cwd);
@@ -258,6 +261,9 @@ proc_destroy(struct proc *proc)
 	}
 	V(proc_count_mutex);
 #endif // UW
+#if OPT_A2
+}
+#endif
 
 }
 

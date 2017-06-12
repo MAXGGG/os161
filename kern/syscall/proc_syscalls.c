@@ -35,7 +35,6 @@ void sys__exit(int exitcode) {
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   if(p->p_parent!=NULL){
     p->p_parent->waitdone= 2;
-    p->p_parent->p_exitcode = _MKWAIT_EXIT(exitcode);
     p->p_parent->p_child_count--;
     lock_acquire(p->p_parent->p_cv_lock);
     cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
@@ -130,7 +129,7 @@ sys_waitpid(pid_t pid,
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
   lock_release(parent->p_cv_lock);
-  exitstatus = parent->p_exitcode;
+  exitstatus = child->p_exitcode;
   #else
   /* for now, just pretend the exitstatus is 0 */
   exitstatus = 0;
