@@ -202,9 +202,7 @@ proc_destroy(struct proc *proc)
 		 KASSERT(cs!=NULL);
 		 struct proc* child = getProcessById(cs->p_id);
 		 if(child!=NULL) child->p_parent = NULL;
-		 carray_remove(&proc->p_children_status, 0);
 	 }
-	 carray_destroy(&proc->p_children_status);
 	 spinlock_release(&proc->p_lock);
 
 	 process_table[(int)proc->p_id] = NULL;
