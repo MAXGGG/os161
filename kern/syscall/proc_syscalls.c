@@ -35,7 +35,7 @@ void sys__exit(int exitcode) {
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   if(p->p_parent!=NULL){
     p->p_parent->p_child_count--;
-    struct childrenStatus* cs = getChildrenByPid(&p->p_parent->p_children_status, p->p_id);
+    struct childrenStatus* cs = getChildrenByPid(&p->p_parent, p->p_id);
     cs->p_exitcode = _MKWAIT_EXIT(exitcode);
     cs->p_state = 1;
     lock_acquire(p->p_parent->p_cv_lock);
@@ -173,7 +173,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
    newp->p_parent = currentproc;
    parray_add(&currentproc->p_children, newp, NULL);
    struct childrenStatus *cs = kmalloc(sizeof(struct childrenStatus));
-   cs->p_pid = newp->p_id;
+   cs->p_id = newp->p_id;
    cs->p_state = 0;
    carray_add(&currentproc->p_children_status, cs, NULL);
    curproc->p_child_count++;
