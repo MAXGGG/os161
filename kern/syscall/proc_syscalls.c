@@ -36,7 +36,7 @@ void sys__exit(int exitcode) {
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
   DEBUG(DB_EXEC,"***************************");
   lock_acquire(p->p_parent->p_cv_lock);
-  cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
+  // cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
   lock_release(p->p_parent->p_cv_lock);
   DEBUG(DB_EXEC,"))))))))))))))))))))))))))))");
   #else
