@@ -94,6 +94,7 @@ sys_waitpid(pid_t pid,
 	    pid_t *retval)
 {
   int exitstatus;
+  int result;
 
   /* this is just a stub implementation that always reports an
      exit status of 0, regardless of the actual exit status of
@@ -109,7 +110,7 @@ sys_waitpid(pid_t pid,
   }
   #if OPT_A2
   struct proc* parent = curproc;
-  struct proc *child = process_table[(int)pid];
+  struct proc *child = getProcessById(pid);
   if(child==NULL){
      return ECHILD;
   }

@@ -101,6 +101,7 @@ extern struct semaphore *no_proc_sem;
 
 #if OPT_A2
 int getAvailablePID(void);
+struct proc* getProcessById(pid_t);
 #endif
 
 /* Call once during system startup to allocate data structures. */
