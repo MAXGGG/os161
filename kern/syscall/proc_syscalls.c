@@ -124,7 +124,7 @@ sys_waitpid(pid_t pid,
   }
   lock_acquire(parent->p_cv_lock);
   while(child->p_state!=1){
-     DEBUG(DB_EXEC,"wating on salal :%d \n", child->p_id);
+     DEBUG(DB_EXEC,"wating on salal :%d \n", (int)child->p_id);
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
   lock_release(parent->p_cv_lock);
