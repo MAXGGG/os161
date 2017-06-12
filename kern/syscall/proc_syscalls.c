@@ -129,7 +129,6 @@ sys_waitpid(pid_t pid,
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
   lock_release(parent->p_cv_lock);
-  DEBUG(DB_EXEC,"DONEEEEEEEEEEEEEEEEE");
   exitstatus = child->p_exitcode;
   #else
   /* for now, just pretend the exitstatus is 0 */
