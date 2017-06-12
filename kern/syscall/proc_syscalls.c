@@ -33,9 +33,9 @@ void sys__exit(int exitcode) {
 
   p->p_state = 1;
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
-  lock_acquire(proc->p_parent->p_cv_lock);
-  cv_broadcast(proc->p_parent->p_cv, proc->p_parent->p_cv_lock);
-  lock_release(proc->p_parent->p_cv_lock);
+  lock_acquire(p->p_parent->p_cv_lock);
+  cv_broadcast(p->p_parent->p_cv, proc->p_parent->p_cv_lock);
+  lock_release(p->p_parent->p_cv_lock);
   #endif
 
 // DEBUG(DB_EXEC, "sys exiting 2\n");
@@ -94,7 +94,6 @@ sys_waitpid(pid_t pid,
 	    pid_t *retval)
 {
   int exitstatus;
-  int result;
 
   /* this is just a stub implementation that always reports an
      exit status of 0, regardless of the actual exit status of
@@ -126,12 +125,12 @@ sys_waitpid(pid_t pid,
   #else
   /* for now, just pretend the exitstatus is 0 */
   exitstatus = 0;
+  #endif
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
     return(result);
   }
   *retval = pid;
-  #endif
   return(0);
 }
 
