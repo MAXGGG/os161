@@ -124,7 +124,7 @@ sys_waitpid(pid_t pid,
   }
   // parent->waitdone = 1;
   lock_acquire(parent->p_cv_lock);
-  while(child->state!=1){
+  while(child->p_state!=1){
      cv_wait(parent->p_cv, parent->p_cv_lock);
   }
   lock_release(parent->p_cv_lock);
