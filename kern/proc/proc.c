@@ -151,6 +151,7 @@ proc_create(const char *name)
 	proc->p_state = 0;
 	proc->p_parent = NULL;
 	proc->p_child_count = 0;
+	proc->waitdone = 0;
 	proc->p_cv_lock = lock_create("p_cv_lock");
 	proc->p_cv = cv_create("p_cv");
 #endif

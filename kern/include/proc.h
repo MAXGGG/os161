@@ -85,6 +85,7 @@ struct proc {
 	int p_exitcode;
 	int p_state; //o running, 1 exited
 	int p_child_count;
+	int waitdone; //0 not waitng, 1 waiting, 2 waiting finished
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
 	struct parray p_children;
