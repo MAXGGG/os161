@@ -30,13 +30,15 @@ void sys__exit(int exitcode) {
   //     cv_wait(p->p_cv, p->p_cv_lock);
   // }
   // lock_release(p->p_cv_lock);
+  DEBUG(DB_EXEC,"(((((((((((((((((");
   KASSERT(p!=NULL);
   p->p_state = 1;
   p->p_exitcode = _MKWAIT_EXIT(exitcode);
+  DEBUG(DB_EXEC,"***************************");
   lock_acquire(p->p_parent->p_cv_lock);
   cv_broadcast(p->p_parent->p_cv, p->p_parent->p_cv_lock);
   lock_release(p->p_parent->p_cv_lock);
-  DEBUG(DB_EXEC,"fisidasdalsd()(*)(*)(*()*)(*)()");
+  DEBUG(DB_EXEC,"))))))))))))))))))))))))))))");
   #else
   (void)exitcode;
   #endif
