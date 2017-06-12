@@ -42,6 +42,7 @@
  * process that will have more than one thread is the kernel process.
  */
 #define PARRAYINLINE
+#define CARRAYINLINE
 
 #include <types.h>
 #include <proc.h>
@@ -99,6 +100,17 @@ struct proc*
 getProcessById(pid_t id){
 	return process_table[(int)id];
 }
+
+struct childrenStatus*
+getChildrenByPid(struct proc* parent, pid_t id){
+	for(int i=0;i<carray_num(&parent->p_children_status);++i){
+		struct childrenStatus* cs = carray_get(&parent->p_children, i);
+		if(cs->p_id==id){
+			return cs;
+		}
+	}
+	return NULL;
+}
 #endif
 
 
@@ -148,6 +160,7 @@ proc_create(const char *name)
 		process_table[PID_MIN] = proc;
 	}
 	parray_init(&proc->p_children);
+	carray_init(&proc->p_children_status);
 	proc->p_state = 0;
 	proc->p_parent = NULL;
 	proc->p_child_count = 0;
@@ -205,9 +218,6 @@ proc_destroy(struct proc *proc)
 		cv_destroy(proc->p_cv);
 	}
 	 #endif
-#if OPT_A2
-if(proc->p_parent==NULL){
-#endif
 	/* VFS fields */
 	if (proc->p_cwd) {
 		VOP_DECREF(proc->p_cwd);
@@ -261,9 +271,6 @@ if(proc->p_parent==NULL){
 	}
 	V(proc_count_mutex);
 #endif // UW
-#if OPT_A2
-}
-#endif
 
 }
 

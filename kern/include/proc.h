@@ -49,11 +49,30 @@
 	DEFARRAY_BYTYPE(parray, struct proc, PARRAYINLINE);
 #endif
 
+
+#if OPT_A2
+ 	#ifndef CHILDRENINLINE
+	#define CHILDRENINLINE INLINE
+	#endif
+
+	DECLARRAY_BYTYPE(carray, struct childrenStatus);
+	DEFARRAY_BYTYPE(carray, struct childrenStatus, CHILDRENINLINE);
+#endif
+
 struct addrspace;
 struct vnode;
 #ifdef UW
 struct semaphore;
 #endif // UW
+
+#if OPT_A2
+//pstuff structure to hold things from kfreeing
+struct childrenStatus{
+  pid_t p_pid;
+  int p_state;
+  int p_exitcode;
+};
+#endif
 
 /*
  * Process structure.
@@ -89,6 +108,7 @@ struct proc {
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
 	struct parray p_children;
+   struct carray p_children_status;
 	#endif
 };
 
@@ -103,6 +123,7 @@ extern struct semaphore *no_proc_sem;
 #if OPT_A2
 int getAvailablePID(void);
 struct proc* getProcessById(pid_t);
+struct childrenStatus* getChildrenByPid(struct proc*, pid_t);
 #endif
 
 /* Call once during system startup to allocate data structures. */
