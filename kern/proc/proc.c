@@ -159,13 +159,10 @@ proc_create(const char *name)
 		proc->p_id = PID_MIN;
 		process_table[PID_MIN] = proc;
 	}
-	parray_init(&proc->p_children);
 	carray_init(&proc->p_children_status);
 	proc->p_state = 0;
 	proc->p_parent = NULL;
-	proc->p_child_count = 0;
 	proc->p_exitcode = 0;
-	proc->waitdone = 0;
 	proc->p_cv_lock = lock_create("p_cv_lock");
 	proc->p_cv = cv_create("p_cv");
 #endif
@@ -198,25 +195,22 @@ proc_destroy(struct proc *proc)
 
 	 #if OPT_A2
 
-	 proc->p_state = 1;
-
 	 //remove proc's children
 	 spinlock_acquire(&proc->p_lock);
-	 if(parray_num(&proc->p_children)>0){
-		for (unsigned i=0; i<parray_num(&proc->p_children); i++)
- 		{
- 			struct proc *child = parray_get(&proc->p_children, i);
- 			KASSERT(child != NULL);
- 			child->p_parent = NULL;
- 		}
+	 while(carray_num(&proc->p_children_status)>0){
+		 struct childrenStatus* cs = carray_get(&proc->p_children_status, 0);
+		 KASSERT(cs!=NULL);
+		 struct proc* child = getProcessById(cs->p_id);
+		 if(child!=NULL) child->p_parent = NULL;
+		 carray_remove(&proc->p_children_status, 0);
+		 kfree(cs);
 	 }
+	 carrry_destroy(&proc->p_children_status);
 	 spinlock_release(&proc->p_lock);
 
-	 if(proc->p_parent==NULL){
-	 	process_table[(int)proc->p_id] = NULL;
-		lock_destroy(proc->p_cv_lock);
-		cv_destroy(proc->p_cv);
-	}
+	 process_table[(int)proc->p_id] = NULL;
+	 lock_destroy(proc->p_cv_lock);
+	 cv_destroy(proc->p_cv);
 	 #endif
 	/* VFS fields */
 	if (proc->p_cwd) {

@@ -40,15 +40,6 @@
 #include <thread.h> /* required for struct threadarray */
 #include "opt-A2.h"
 
-#if OPT_A2
- 	#ifndef PARRAYINLINE
-	#define PARRAYINLINE INLINE
-	#endif
-
-	DECLARRAY_BYTYPE(parray, struct proc);
-	DEFARRAY_BYTYPE(parray, struct proc, PARRAYINLINE);
-#endif
-
 
 #if OPT_A2
  	#ifndef CHILDRENINLINE
@@ -103,11 +94,8 @@ struct proc {
  	struct proc *p_parent;
 	int p_exitcode;
 	int p_state; //o running, 1 exited
-	int p_child_count;
-	int waitdone; //0 not waitng, 1 waiting, 2 waiting finished
 	struct lock *p_cv_lock;
 	struct cv *p_cv;
-	struct parray p_children;
    struct carray p_children_status;
 	#endif
 };
