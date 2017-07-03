@@ -54,11 +54,11 @@
  * Calls vfs_open on progname and thus may destroy it.
  */
 int
-#if OPT_A2
-runprogram(char *progname, int argc, char** argv)
-#else
+// #if OPT_A2
+// runprogram(char *progname, int argc, char** argv)
+// #else
 runprogram(char *progname)
-#endif
+// #endif
 {
 	struct addrspace *as;
 	struct vnode *v;
@@ -102,28 +102,28 @@ runprogram(char *progname)
 		/* p_addrspace will go away when curproc is destroyed */
 		return result;
 	}
-	#if OPT_A2
-	stackptr -= sizeof(char*) * (argc+1);
-	char ** args_u = (char**)stackptr;
-	for(int i=0;i<argc;++i){
-		char* arg = argv[i];
-		stackptr -= strlen(arg)+1;
-		result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
-		if(result){
-			return result;
-		}
-		args_u[i] = (char*) stackptr;
-	}
-	args_u[argc] = NULL;
-	stackptr -= stackptr%8;
-	enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
-			  stackptr, entrypoint);
-	#else
-
-	/* Warp to user mode. */
-	enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
-			  stackptr, entrypoint);
-	#endif
+	// #if OPT_A2
+	// stackptr -= sizeof(char*) * (argc+1);
+	// char ** args_u = (char**)stackptr;
+	// for(int i=0;i<argc;++i){
+	// 	char* arg = argv[i];
+	// 	stackptr -= strlen(arg)+1;
+	// 	result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
+	// 	if(result){
+	// 		return result;
+	// 	}
+	// 	args_u[i] = (char*) stackptr;
+	// }
+	// args_u[argc] = NULL;
+	// stackptr -= stackptr%8;
+	// enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
+	// 		  stackptr, entrypoint);
+	// #else
+	//
+	// /* Warp to user mode. */
+	// enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
+	// 		  stackptr, entrypoint);
+	// #endif
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");
 	return EINVAL;
