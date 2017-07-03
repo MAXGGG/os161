@@ -302,8 +302,8 @@ sys_execv(userptr_t program, userptr_t args){
    // stackptr -= stackptr%8;
    // enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
    //         stackptr, entrypoint);
-   enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
-			  stackptr, entrypoint);
+   // enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
+	// 		  stackptr, entrypoint);
 
    /* enter_new_process does not return. */
    panic("enter_new_process returned\n");
