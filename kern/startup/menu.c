@@ -93,9 +93,10 @@ cmd_progthread(void *ptr, unsigned long nargs)
 	int result;
 
 	KASSERT(nargs >= 1);
-	// #if OPT_A2
-	// result = runprogram(progname, nargs, args);
-	// #else
+	#if OPT_A2
+	strcpy(progname, args[0]);
+	result = runprogram(progname, nargs, args);
+	#else
 
 	if (nargs > 2) {
 		kprintf("Warning: argument passing from menu not supported\n");
@@ -106,7 +107,7 @@ cmd_progthread(void *ptr, unsigned long nargs)
 
 	strcpy(progname, args[0]);
 	result = runprogram(progname);
-	// #endif
+	#endif
 	if (result) {
 		kprintf("Running program %s failed: %s\n", args[0],
 			strerror(result));
