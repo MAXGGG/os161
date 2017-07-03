@@ -281,6 +281,7 @@ sys_execv(userptr_t program, userptr_t args){
    }
 
    /* Warp to user mode. */
+   stackptr -= stackptr%4;
    stackptr -= sizeof(char*) * (argc+1);
    char ** args_u = (char**)stackptr;
    for(int i=0;i<argc;++i){

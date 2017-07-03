@@ -103,6 +103,7 @@ runprogram(char *progname)
 		return result;
 	}
 	#if OPT_A2
+	stackptr -= stackptr%4;
 	stackptr -= sizeof(char*) * (argc+1);
 	char ** args_u = (char**)stackptr;
 	for(int i=0;i<argc;++i){
