@@ -205,7 +205,8 @@ sys_execv(userptr_t program, userptr_t args){
    struct addrspace *as;
    struct vnode *v;
    vaddr_t entrypoint, stackptr;
-   int result, argc;
+   int result;
+   int argc = 0;
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdaaaaa\n");
 
    char* pname = (char*) program;
