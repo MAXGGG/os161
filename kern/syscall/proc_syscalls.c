@@ -253,6 +253,24 @@ sys_execv(userptr_t program, userptr_t args){
    }
 
    /* Warp to user mode. */
+   stackptr -= sizeof(char*) * (argc+1);
+   char ** args_u = (char**)stackptr;
+   for(int i=0;i<argc;++i){
+      char* arg = argv[i];
+      stackptr -= strlen(arg)+1;
+      result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
+      if(result){
+         return result;
+      }
+      args_u[i] = (char*) stackptr;
+   }
+   args_u[argc] = NULL;
+   stackptr -= stackptr%8;
+   enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
+           stackptr, entrypoint);
+   #else
+
+   /* Warp to user mode. */
    enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
            stackptr, entrypoint);
 
