@@ -201,12 +201,14 @@ sys_fork(struct trapframe *tf, pid_t *retval)
 }
 
 int
-sys_execv(const char *program, char **args){
+sys_execv(userptr_t program, userptr_t args){
    (void) args;
    struct addrspace *as;
    struct vnode *v;
    vaddr_t entrypoint, stackptr;
    int result;
+
+   program = (char*) program;
 
    char* program_path = kmalloc(sizeof(char)*strlen(program));
    if(!program_path){
