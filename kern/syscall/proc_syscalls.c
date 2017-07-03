@@ -208,13 +208,13 @@ sys_execv(userptr_t program, userptr_t args){
    vaddr_t entrypoint, stackptr;
    int result;
 
-   program = (char*) program;
+   char* pname = (char*) program;
 
-   char* program_path = kmalloc(sizeof(char)*strlen(program));
+   char* program_path = kmalloc(sizeof(char)*strlen(pname));
    if(!program_path){
          return ENOMEM;
    }
-   strcpy(program_path, program);
+   strcpy(program_path, pname);
 
    /* Open the file. */
    result = vfs_open(program_path, O_RDONLY, 0, &v);
