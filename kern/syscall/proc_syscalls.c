@@ -222,8 +222,6 @@ sys_execv(userptr_t program, userptr_t args){
       return result;
    }
 
-   /* We should be a new process. */
-   KASSERT(curproc_getas() == NULL);
 
    /* Create a new address space. */
    as = as_create();
