@@ -108,7 +108,7 @@ runprogram(char *progname)
 	for(int i=0;i<argc;++i){
 		char* arg = argv[i];
 		stackptr -= strlen(arg)+1;
-		result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1);
+		result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
 		if(result){
 			return result;
 		}
