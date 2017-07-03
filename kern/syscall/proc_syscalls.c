@@ -225,6 +225,10 @@ sys_execv(userptr_t program, userptr_t args){
    if(!argv){
       return ENOMEM;
    }
+   argv[0] = kmalloc(strlen(pname)+1);
+   if(!argv[0]){
+      return ENOMEM;
+   }
    result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
    if(result){
       return result;
