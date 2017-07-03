@@ -11,6 +11,7 @@
 #include <addrspace.h>
 #include <copyinout.h>
 #include <mips/trapframe.h>
+#include <kern/fcntl.h>
 #include <synch.h>
 #include "opt-A2.h"
 
