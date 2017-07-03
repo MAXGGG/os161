@@ -218,6 +218,7 @@ sys_execv(userptr_t program, userptr_t args){
    strcpy(program_path, pname);
 
    for(char** i=(char**)args; *i!=NULL;++i){
+      DEBUG(DB_EXEC, "current i is %s \n", *i);
       argc++;
    }
    DEBUG(DB_EXEC, "argc argc argc is %d \n", argc);
