@@ -200,6 +200,7 @@ sys_fork(struct trapframe *tf, pid_t *retval)
 
 int
 sys_execv(const char *program, char **args){
+   (void) args;
    struct addrspace *as;
    struct vnode *v;
    vaddr_t entrypoint, stackptr;
