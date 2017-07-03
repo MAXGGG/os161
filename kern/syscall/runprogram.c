@@ -44,6 +44,8 @@
 #include <vfs.h>
 #include <syscall.h>
 #include <test.h>
+#include <copyinout.h>
+#include "opt-A2.h"
 
 /*
  * Load program "progname" and start running it in usermode.
@@ -114,7 +116,7 @@ runprogram(char *progname)
 	}
 	args_u[argc] = NULL;
 	stackptr -= stackptr%8;
-	enter_new_process(argc /*argc*/, args_u /*userspace addr of argv*/,
+	enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
 			  stackptr, entrypoint);
 	#else
 
