@@ -220,7 +220,7 @@ sys_execv(userptr_t program, userptr_t args){
    for(char** i=(char**)args; *i!=NULL;++i){
       argc++;
    }
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdccccc\n");
+   DEBUG(DB_EXEC, "argc argc argc is %d \n", argc);
    char** argv = kmalloc(sizeof(char*) * (argc+1));
    if(!argv){
       return ENOMEM;
