@@ -216,7 +216,7 @@ sys_execv(userptr_t program, userptr_t args){
    }
    strcpy(program_path, pname);
 
-   for(char** i=(char**)args; i!=NULL;++i){
+   for(char** i=(char**)args; *i!=NULL;++i){
       argc++;
    }
 
@@ -301,6 +301,7 @@ sys_execv(userptr_t program, userptr_t args){
    /* Warp to user mode. */
    enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
            stackptr, entrypoint);
+   #endif
 
    /* enter_new_process does not return. */
    panic("enter_new_process returned\n");
