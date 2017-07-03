@@ -202,108 +202,104 @@ sys_fork(struct trapframe *tf, pid_t *retval)
 
 int
 sys_execv(userptr_t program, userptr_t args){
-   (void) args;
-   (void) program;
-   // struct addrspace *as;
-   // struct vnode *v;
-   // vaddr_t entrypoint, stackptr;
-   // int result, argc;
-   //
-   // char* pname = (char*) program;
-   //
-   // char* program_path = kmalloc(sizeof(char)*strlen(pname));
-   // if(!program_path){
-   //       return ENOMEM;
-   // }
-   // strcpy(program_path, pname);
-   //
-   // for(char** i=(char**)args; *i!=NULL;++i){
-   //    argc++;
-   // }
-   //
-   // char** argv = kmalloc(sizeof(char*) * (argc+1));
-   // if(!argv){
-   //    return ENOMEM;
-   // }
-   // result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
-   // if(result){
-   //    return result;
-   // }
-   //
-   // char** arg_a = (char**) args;
-   // for(int i=1;i<argc;++i){
-   //    argv[i] = kmalloc(strlen(arg_a[i])+1);
-   //    if(argv[i]){
-   //       result = copyinstr((userptr_t)arg_a[i], argv[i], strlen(arg_a[i])+1, NULL);
-   //       if(result){
-   //          return result;
-   //       }
-   //    }else{
-   //       return ENOMEM;
-   //    }
-   // }
-   //
-   // argv[argc] = NULL;
-   // DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj00000  %s \n",
-   //   argv[0]);
-   //   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj11111  %s \n",
-   //     argv[1]);
-   //
-   // /* Open the file. */
-   // result = vfs_open(program_path, O_RDONLY, 0, &v);
-   // if (result) {
-   //    return result;
-   // }
-   //
-   //
-   // /* Create a new address space. */
-   // as = as_create();
-   // if (as ==NULL) {
-   //    vfs_close(v);
-   //    return ENOMEM;
-   // }
-   //
-   // /* Switch to it and activate it. */
-   // curproc_setas(as);
-   // as_activate();
-   //
-   // /* Load the executable. */
-   // result = load_elf(v, &entrypoint);
-   // if (result) {
-   //    /* p_addrspace will go away when curproc is destroyed */
-   //    vfs_close(v);
-   //    return result;
-   // }
-   //
-   // /* Done with the file now. */
-   // vfs_close(v);
-   //
-   // /* Define the user stack in the address space */
-   // result = as_define_stack(as, &stackptr);
-   // if (result) {
-   //    /* p_addrspace will go away when curproc is destroyed */
-   //    return result;
-   // }
+   struct addrspace *as;
+   struct vnode *v;
+   vaddr_t entrypoint, stackptr;
+   int result, argc;
 
-   // /* Warp to user mode. */
-   // stackptr -= stackptr%4;
-   // stackptr -= sizeof(char*) * (argc+1);
-   // char ** args_u = (char**)stackptr;
-   // for(int i=0;i<argc;++i){
-   //    char* arg = argv[i];
-   //    stackptr -= strlen(arg)+1;
-   //    result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
-   //    if(result){
-   //       return result;
-   //    }
-   //    args_u[i] = (char*) stackptr;
-   // }
-   // args_u[argc] = NULL;
-   // stackptr -= stackptr%8;
-   // enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
-   //         stackptr, entrypoint);
-   // enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
-	// 		  stackptr, entrypoint);
+   char* pname = (char*) program;
+
+   char* program_path = kmalloc(sizeof(char)*strlen(pname));
+   if(!program_path){
+         return ENOMEM;
+   }
+   strcpy(program_path, pname);
+
+   for(char** i=(char**)args; *i!=NULL;++i){
+      argc++;
+   }
+
+   char** argv = kmalloc(sizeof(char*) * (argc+1));
+   if(!argv){
+      return ENOMEM;
+   }
+   result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
+   if(result){
+      return result;
+   }
+
+   char** arg_a = (char**) args;
+   for(int i=1;i<argc;++i){
+      argv[i] = kmalloc(strlen(arg_a[i])+1);
+      if(argv[i]){
+         result = copyinstr((userptr_t)arg_a[i], argv[i], strlen(arg_a[i])+1, NULL);
+         if(result){
+            return result;
+         }
+      }else{
+         return ENOMEM;
+      }
+   }
+
+   argv[argc] = NULL;
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj00000  %s \n",
+     argv[0]);
+     DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj11111  %s \n",
+       argv[1]);
+
+   /* Open the file. */
+   result = vfs_open(program_path, O_RDONLY, 0, &v);
+   if (result) {
+      return result;
+   }
+
+
+   /* Create a new address space. */
+   as = as_create();
+   if (as ==NULL) {
+      vfs_close(v);
+      return ENOMEM;
+   }
+
+   /* Switch to it and activate it. */
+   curproc_setas(as);
+   as_activate();
+
+   /* Load the executable. */
+   result = load_elf(v, &entrypoint);
+   if (result) {
+      /* p_addrspace will go away when curproc is destroyed */
+      vfs_close(v);
+      return result;
+   }
+
+   /* Done with the file now. */
+   vfs_close(v);
+
+   /* Define the user stack in the address space */
+   result = as_define_stack(as, &stackptr);
+   if (result) {
+      /* p_addrspace will go away when curproc is destroyed */
+      return result;
+   }
+
+   /* Warp to user mode. */
+   stackptr -= stackptr%4;
+   stackptr -= sizeof(char*) * (argc+1);
+   char ** args_u = (char**)stackptr;
+   for(int i=0;i<argc;++i){
+      char* arg = argv[i];
+      stackptr -= strlen(arg)+1;
+      result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
+      if(result){
+         return result;
+      }
+      args_u[i] = (char*) stackptr;
+   }
+   args_u[argc] = NULL;
+   stackptr -= stackptr%8;
+   enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
+           stackptr, entrypoint);
 
    /* enter_new_process does not return. */
    panic("enter_new_process returned\n");
