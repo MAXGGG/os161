@@ -206,6 +206,7 @@ sys_execv(userptr_t program, userptr_t args){
    struct vnode *v;
    vaddr_t entrypoint, stackptr;
    int result, argc;
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdaaaaa\n");
 
    char* pname = (char*) program;
 
@@ -213,12 +214,13 @@ sys_execv(userptr_t program, userptr_t args){
    if(!program_path){
          return ENOMEM;
    }
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdbbbb\n");
    strcpy(program_path, pname);
 
    for(char** i=(char**)args; *i!=NULL;++i){
       argc++;
    }
-
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdccccc\n");
    char** argv = kmalloc(sizeof(char*) * (argc+1));
    if(!argv){
       return ENOMEM;
@@ -227,6 +229,7 @@ sys_execv(userptr_t program, userptr_t args){
    if(result){
       return result;
    }
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkddddd\n");
 
    char** arg_a = (char**) args;
    for(int i=1;i<argc;++i){
