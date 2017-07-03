@@ -120,9 +120,9 @@ runprogram(char *progname)
 	// 		  stackptr, entrypoint);
 	// #else
 	//
-	// /* Warp to user mode. */
-	// enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
-	// 		  stackptr, entrypoint);
+	/* Warp to user mode. */
+	enter_new_process(0 /*argc*/, NULL /*userspace addr of argv*/,
+			  stackptr, entrypoint);
 	// #endif
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");
