@@ -243,6 +243,10 @@ sys_execv(userptr_t program, userptr_t args){
    }
 
    argv[argc] = NULL;
+   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj00000  %s \n",
+     argv[0]);
+     DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj11111  %s \n", 
+       argv[1]);
 
    /* Open the file. */
    result = vfs_open(program_path, O_RDONLY, 0, &v);
