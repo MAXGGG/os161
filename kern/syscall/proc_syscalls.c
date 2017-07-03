@@ -206,7 +206,7 @@ sys_execv(userptr_t program, userptr_t args){
    struct addrspace *as;
    struct vnode *v;
    vaddr_t entrypoint, stackptr;
-   int result;
+   int result, argc;
 
    char* pname = (char*) program;
 
@@ -215,6 +215,34 @@ sys_execv(userptr_t program, userptr_t args){
          return ENOMEM;
    }
    strcpy(program_path, pname);
+
+   for(char** i=(char**)args; i!=NULL;++i){
+      argc++;
+   }
+
+   char** argv = kmalloc(sizeof(char*) * (argc+1));
+   if(!argv){
+      return ENOMEM;
+   }
+   result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
+   if(result){
+      return result;
+   }
+
+   char** arg_a = (char**) args;
+   for(int i=1;i<argc;++i){
+      argv[i] = kmalloc(strlen(arg_a[i])+1);
+      if(argv[i]){
+         result = copyinstr((userptr_t)arg_a[i], argv[i], strlen(arg_a[i])+1, NULL);
+         if(result){
+            return result;
+         }
+      }else{
+         return ENOMEM;
+      }
+   }
+
+   argv[argc] = NULL;
 
    /* Open the file. */
    result = vfs_open(program_path, O_RDONLY, 0, &v);
