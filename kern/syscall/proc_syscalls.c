@@ -237,14 +237,12 @@ sys_execv(userptr_t program, userptr_t args){
    }
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkddddd\n");
 
-   char** arg_a = (char**) args;
+   char **temp=(char**)args;
    for(int i=1;i<argc;++i){
-      size_t length = strlen(arg_a[i-1])+1;
-      DEBUG(DB_EXEC, "legnth is %d \n", length );
-      argv[i] = kmalloc(strlen(arg_a[i-1])+1);
-      DEBUG(DB_EXEC, "km is done hoyeeeeeee");
-      if(argv[i]){
-         result = copyinstr((userptr_t)arg_a[i-1], argv[i], length, NULL);
+      len = strlen(temp[i-1])+1;
+      argv[i] = kmalloc(len);
+      if(argv[i] != NULL){
+        result = copyinstr((userptr_t)temp[i-1], argv[i], len, NULL);
          DEBUG(DB_EXEC, "copy in is done as wellllll");
          if(result){
             return result;
