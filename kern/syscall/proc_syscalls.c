@@ -244,7 +244,7 @@ sys_execv(userptr_t program, userptr_t args){
    for(int i=0;i<argc;++i){
       size_t length = strlen(arg_a[i])+1;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
-      argv[i] = kmalloc((size_t)12);
+      argv[i] = kmalloc(12);
       DEBUG(DB_EXEC, "km is done hoyeeeeeee");
       if(argv[i]){
          result = copyinstr((userptr_t)arg_a[i], argv[i], length, NULL);
