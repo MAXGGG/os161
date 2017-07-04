@@ -325,6 +325,9 @@ sys_execv(userptr_t program, userptr_t args){
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdjkdlldjskslsl_----------- \n");
 
    as_destroy(old_as);
+   kfree(pname);
+   kfree(program_path);
+   kfree(argv);
    enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
            stackptr, entrypoint);
 
