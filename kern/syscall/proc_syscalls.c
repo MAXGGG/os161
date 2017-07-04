@@ -220,7 +220,7 @@ sys_execv(userptr_t program, userptr_t args){
 
    for(char** i=(char**)args; *i!=NULL;++i){
 
-      DEBUG(DB_EXEC, "current i is %s \n", i[1]);
+      DEBUG(DB_EXEC, "current i is %s \n", *i);
       argc++;
    }
    DEBUG(DB_EXEC, "argc argc argc is %d \n", argc);
@@ -244,7 +244,7 @@ sys_execv(userptr_t program, userptr_t args){
    for(int i=0;i<argc;++i){
       size_t length = strlen(arg_a[i])+1;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
-      argv[i] = kmalloc(strlen(arg_a[i])+1);
+      argv[i] = kmalloc((size_t)12);
       DEBUG(DB_EXEC, "km is done hoyeeeeeee");
       if(argv[i]){
          result = copyinstr((userptr_t)arg_a[i], argv[i], length, NULL);
