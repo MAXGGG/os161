@@ -327,7 +327,7 @@ sys_execv(userptr_t program, userptr_t args){
    as_destroy(old_as);
    kfree(pname);
    kfree(program_path);
-   kfree(argv);
+   // kfree(argv);
    enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
            stackptr, entrypoint);
 
