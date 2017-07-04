@@ -210,13 +210,13 @@ sys_execv(userptr_t program, userptr_t args){
      int result;
 
      // if the input is not valid
-     if ((char*)progname == NULL || (char**)args == NULL) {
+     if ((char*)program == NULL || (char**)args == NULL) {
        return EFAULT;
      }
 
      //to do: copy arguments and program path to kernel
      int argc = 0;
-     char **argv = NULL;
+        char** argv = kmalloc(sizeof(char*) * (argc+1));
 
    char* pname = (char*) program;
 
@@ -232,7 +232,7 @@ sys_execv(userptr_t program, userptr_t args){
       argc++;
    }
    DEBUG(DB_EXEC, "argc argc argc is %d \n", argc);
-   char** argv = kmalloc(sizeof(char*) * (argc+1));
+
    if(!argv){
       return ENOMEM;
    }
