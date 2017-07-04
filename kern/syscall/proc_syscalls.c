@@ -242,7 +242,7 @@ sys_execv(userptr_t program, userptr_t args){
 
    char** arg_a = (char**) args;
    for(int i=0;i<argc;++i){
-      size_t length = strlen(pname)+1;
+      size_t length = strlen(arg_a[i])+1;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
       DEBUG(DB_EXEC, "string is %s \n", arg_a[i] );
       argv[i] = kmalloc(length);
