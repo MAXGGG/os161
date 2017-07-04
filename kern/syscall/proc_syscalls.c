@@ -219,6 +219,7 @@ sys_execv(userptr_t program, userptr_t args){
    strcpy(program_path, pname);
 
    for(char** i=(char**)args; *i!=NULL;++i){
+
       DEBUG(DB_EXEC, "current i is %s \n", *i);
       argc++;
    }
@@ -227,22 +228,26 @@ sys_execv(userptr_t program, userptr_t args){
    if(!argv){
       return ENOMEM;
    }
-   argv[0] = kmalloc(strlen(pname)+1);
-   if(!argv[0]){
-      return ENOMEM;
-   }
-   result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
-   if(result){
-      return result;
-   }
+
+   // argv[0] = kmalloc(strlen(pname)+1);
+   // if(!argv[0]){
+   //    return ENOMEM;
+   // }
+   // result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
+   // if(result){
+   //    return result;
+   // }
+
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkddddd\n");
 
-   char **temp=(char**)args;
-   for(int i=1;i<argc;++i){
-      size_t len = strlen(temp[i-1])+1;
-      argv[i] = kmalloc(len);
-      if(argv[i] != NULL){
-        result = copyinstr((userptr_t)temp[i-1], argv[i], len, NULL);
+   char** arg_a = (char**) args;
+   for(int i=0;i<argc;++i){
+      size_t length = strlen(arg_a[i])+1;
+      DEBUG(DB_EXEC, "legnth is %d \n", length );
+      argv[i] = kmalloc(strlen(arg_a[i])+1);
+      DEBUG(DB_EXEC, "km is done hoyeeeeeee");
+      if(argv[i]){
+         result = copyinstr((userptr_t)arg_a[i-1], argv[i], length, NULL);
          DEBUG(DB_EXEC, "copy in is done as wellllll");
          if(result){
             return result;
