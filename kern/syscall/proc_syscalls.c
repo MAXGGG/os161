@@ -207,7 +207,6 @@ sys_execv(userptr_t program, userptr_t args){
    vaddr_t entrypoint, stackptr;
    int result;
    int argc = 0;
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdaaaaa\n");
 
    char* pname = (char*) program;
 
@@ -215,10 +214,12 @@ sys_execv(userptr_t program, userptr_t args){
    if(!program_path){
          return ENOMEM;
    }
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdbbbb\n");
+
    strcpy(program_path, pname);
 
-   for(char** i=(char**)args; *i!=NULL;++i){
+    DEBUG(DB_EXEC, "program name is %s \n", pname);
+
+  for(char** i=(char**)args; *i!=NULL;++i){
 
       DEBUG(DB_EXEC, "current i is %s \n", *i);
       argc++;
@@ -238,12 +239,11 @@ sys_execv(userptr_t program, userptr_t args){
       return result;
    }
 
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkddddd\n");
-
    char** arg_a = (char**) args;
    for(int i=1;i<argc;++i){
-      size_t length = (size_t)strlen(arg_a[i])+1;
-      // if(length<17) length = 17;
+      // size_t length = (size_t)strlen(arg_a[i])+1;
+      int length = (int)strlen(arg_a[i])+1;
+      if(length<17) length = 17;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
       DEBUG(DB_EXEC, "string is %s \n", arg_a[i] );
       argv[i] = kmalloc(length);
@@ -260,12 +260,6 @@ sys_execv(userptr_t program, userptr_t args){
    }
 
    argv[argc] = NULL;
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj00000  %s \n",
-     argv[0]);
-     DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj11111  %s \n",
-       argv[1]);
-
-
 
 
 
@@ -308,8 +302,6 @@ sys_execv(userptr_t program, userptr_t args){
    }
 
    /* Warp to user mode. */
-   // stackptr -= stackptr%4;
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdjkdlldjskslsl......... \n");
    stackptr -= sizeof(char*) * (argc+1);
    char ** args_u = (char**)stackptr;
    for(int i=0;i<argc;++i){
@@ -323,7 +315,6 @@ sys_execv(userptr_t program, userptr_t args){
    }
    args_u[argc] = NULL;
    stackptr -= stackptr%8;
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdjkdlldjskslsl_----------- \n");
 
    as_destroy(old_as);
 
