@@ -202,12 +202,21 @@ sys_fork(struct trapframe *tf, pid_t *retval)
 
 int
 sys_execv(userptr_t program, userptr_t args){
-   struct addrspace *as;
-   struct vnode *v;
-   vaddr_t entrypoint, stackptr;
-   int result;
-   int argc = 0;
-   DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdaaaaa\n");
+
+     struct addrspace *as;
+     struct addrspace *old_as;
+     struct vnode *v;
+     vaddr_t entrypoint, stackptr;
+     int result;
+
+     // if the input is not valid
+     if ((char*)progname == NULL || (char**)args == NULL) {
+       return EFAULT;
+     }
+
+     //to do: copy arguments and program path to kernel
+     int argc = 0;
+     char **argv = NULL;
 
    char* pname = (char*) program;
 
@@ -256,63 +265,88 @@ sys_execv(userptr_t program, userptr_t args){
      DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdj11111  %s \n",
        argv[1]);
 
-   /* Open the file. */
-   result = vfs_open(program_path, O_RDONLY, 0, &v);
-   if (result) {
-      return result;
-   }
 
 
-   /* Create a new address space. */
-   as = as_create();
-   if (as ==NULL) {
-      vfs_close(v);
-      return ENOMEM;
-   }
+     char *name = argv[0];
+     /* Open the file. */
+     result = vfs_open(name, O_RDONLY, 0, &v);
+     if (result) {
+       return result;
+     }
 
-   /* Switch to it and activate it. */
-   curproc_setas(as);
-   as_activate();
+     /* Create a new address space. */
+     as = as_create();
+     if (as ==NULL) {
+       vfs_close(v);
+       return ENOMEM;
+     }
 
-   /* Load the executable. */
-   result = load_elf(v, &entrypoint);
-   if (result) {
-      /* p_addrspace will go away when curproc is destroyed */
-      vfs_close(v);
-      return result;
-   }
+     /* Switch to it and activate it. */
+     old_as = curproc_setas(as);
+     as_activate();
 
-   /* Done with the file now. */
-   vfs_close(v);
+     /* Load the executable. */
+     result = load_elf(v, &entrypoint);
+     if (result) {
+       /* p_addrspace will go away when curproc is destroyed */
+       vfs_close(v);
+       // rollback to old as
+       curproc_setas(old_as);
+       return result;
+     }
 
-   /* Define the user stack in the address space */
-   result = as_define_stack(as, &stackptr);
-   if (result) {
-      /* p_addrspace will go away when curproc is destroyed */
-      return result;
-   }
+     /* Done with the file now. */
+     vfs_close(v);
 
-   /* Warp to user mode. */
-   stackptr -= stackptr%4;
-   stackptr -= sizeof(char*) * (argc+1);
-   char ** args_u = (char**)stackptr;
-   for(int i=0;i<argc;++i){
-      char* arg = argv[i];
-      stackptr -= strlen(arg)+1;
-      result = copyoutstr(arg, (userptr_t)stackptr, strlen(arg)+1, NULL);
-      if(result){
+     /* Define the user stack in the address space */
+     result = as_define_stack(as, &stackptr);
+     if (result) {
+       // rollback to old as
+       curproc_setas(old_as);
+       return result;
+     }
+
+     //to do: copy arguments into new address space
+     // make sure argument array starts at 4-alignment address
+     while ((stackptr % 4) != 0) {
+       stackptr--;
+     }
+
+     // store the argument arary
+     stackptr -= sizeof(char *)*(argc+1);
+     // point the start of args_array to this stackptr, so we can modify it later
+     char** args_array = (char**)stackptr;
+
+     // store each argument into user address space
+     for (int i=0;i<argc;i++) {
+       size_t len = (strlen(argv[i])+1);
+       stackptr -= len;
+       result = copyoutstr((const void *)argv[i], (userptr_t)stackptr, len, NULL);
+       if (result) {
          return result;
-      }
-      args_u[i] = (char*) stackptr;
-   }
-   args_u[argc] = NULL;
-   stackptr -= stackptr%8;
-   enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
-           stackptr, entrypoint);
+       }
+       args_array[i] = (char*)stackptr;
+     }
+     args_array[argc] = NULL;
 
-   /* enter_new_process does not return. */
-   panic("enter_new_process returned\n");
-   return EINVAL;
+     // make sure final argument array starts at 8-alignment address
+     while ((stackptr % 8) != 0) {
+       (stackptr)--;
+     }
+
+       // clean up kernel space
+           as_destroy(old_as);
+           for(int i = 0; i < argc; ++i){
+               kfree(argv[i]);
+           }
+           kfree(argv);
+
+     /* Warp to user mode. */
+     enter_new_process(argc/*argc*/, (userptr_t)args_array /*userspace addr of argv*/,
+           stackptr, entrypoint);
+     /* enter_new_process does not return. */
+     panic("enter_new_process returned\n");
+     return EINVAL;
 }
 
 #endif
