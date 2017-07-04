@@ -245,7 +245,7 @@ sys_execv(userptr_t program, userptr_t args){
       int length = (int)strlen(arg_a[i])+1;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
       DEBUG(DB_EXEC, "string is %s \n", arg_a[i] );
-      argv[i] = kmalloc(length*4);
+      argv[i] = kmalloc(16);
       DEBUG(DB_EXEC, "km is done hoyeeeeeee");
       if(argv[i]){
          result = copyinstr((userptr_t)arg_a[i], argv[i], length, NULL);
@@ -325,9 +325,7 @@ sys_execv(userptr_t program, userptr_t args){
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkdjkdlldjskslsl_----------- \n");
 
    as_destroy(old_as);
-   kfree(pname);
-   kfree(program_path);
-   // kfree(argv);
+
    enter_new_process(argc /*argc*/, (userptr_t)args_u /*userspace addr of argv*/,
            stackptr, entrypoint);
 
