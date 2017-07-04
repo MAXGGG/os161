@@ -247,7 +247,7 @@ sys_execv(userptr_t program, userptr_t args){
       argv[i] = kmalloc(strlen(arg_a[i])+1);
       DEBUG(DB_EXEC, "km is done hoyeeeeeee");
       if(argv[i]){
-         result = copyinstr((userptr_t)arg_a[i-1], argv[i], length, NULL);
+         result = copyinstr((userptr_t)arg_a[i], argv[i], length, NULL);
          DEBUG(DB_EXEC, "copy in is done as wellllll");
          if(result){
             return result;
