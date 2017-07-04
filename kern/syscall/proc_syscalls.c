@@ -239,7 +239,7 @@ sys_execv(userptr_t program, userptr_t args){
 
    char **temp=(char**)args;
    for(int i=1;i<argc;++i){
-      len = strlen(temp[i-1])+1;
+      size_t len = strlen(temp[i-1])+1;
       argv[i] = kmalloc(len);
       if(argv[i] != NULL){
         result = copyinstr((userptr_t)temp[i-1], argv[i], len, NULL);
