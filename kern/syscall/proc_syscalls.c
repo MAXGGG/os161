@@ -229,23 +229,23 @@ sys_execv(userptr_t program, userptr_t args){
       return ENOMEM;
    }
 
-   // argv[0] = kmalloc(strlen(pname)+1);
-   // if(!argv[0]){
-   //    return ENOMEM;
-   // }
-   // result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
-   // if(result){
-   //    return result;
-   // }
+   argv[0] = kmalloc(strlen(pname)+1);
+   if(!argv[0]){
+      return ENOMEM;
+   }
+   result = copyinstr((userptr_t)program, argv[0], strlen(pname)+1, NULL );
+   if(result){
+      return result;
+   }
 
    DEBUG(DB_EXEC, "ELF: Loadingsadkjaslkdjaslkddddd\n");
 
    char** arg_a = (char**) args;
-   for(int i=0;i<argc;++i){
-      size_t length = strlen(arg_a[i])+1;
+   for(int i=1;i<argc;++i){
+      int length = (int)strlen(arg_a[i])+1;
       DEBUG(DB_EXEC, "legnth is %d \n", length );
       DEBUG(DB_EXEC, "string is %s \n", arg_a[i] );
-      argv[i] = kmalloc(17);
+      argv[i] = kmalloc(length);
       DEBUG(DB_EXEC, "km is done hoyeeeeeee");
       if(argv[i]){
          result = copyinstr((userptr_t)arg_a[i], argv[i], length, NULL);
