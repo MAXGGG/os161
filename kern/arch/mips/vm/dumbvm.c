@@ -200,7 +200,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 		splx(spl);
 		return 0;
 	}
-	#if opt-A3
+	#if OPT-A3
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
@@ -208,7 +208,6 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	splx(spl);
 	return 0;
 	#else
-
 	kprintf("dumbvm: Ran out of TLB entries - cannot handle page fault\n");
 	splx(spl);
 	return EFAULT;
