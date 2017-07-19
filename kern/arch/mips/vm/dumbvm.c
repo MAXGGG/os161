@@ -115,7 +115,8 @@ getppages(unsigned long npages)
 	}
 
 	if(contiguous_frames!=npages){
-		return ENOMEM;
+		spinlock_release(&stealmem_lock);
+		panic("no enough memory");
 	}
 
 	for(int i=index;i<(int)(index+npages);++i){
