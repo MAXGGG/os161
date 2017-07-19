@@ -128,12 +128,12 @@ kill_curthread(vaddr_t epc, unsigned code, vaddr_t vaddr)
 	 KASSERT(p!=NULL);
 	 //set current process state to exit
 	 p->p_state = 1;
-	 p->p_exitcode = _MKWAIT_EXIT(exitcode);
+	 p->p_exitcode = _MKWAIT_SIG(sig);
 	 if(p->p_parent!=NULL){
 
 	   //save exit information into parent status array
 	   struct childrenStatus* cs = getChildrenByPid(p->p_parent, p->p_id);
-	   cs->p_exitcode = _MKWAIT_SIG(exitcode);
+	   cs->p_exitcode = _MKWAIT_SIG(sig);
 	   cs->p_state = 1;
 
 	   lock_acquire(p->p_parent->p_cv_lock);
