@@ -88,6 +88,9 @@ kill_curthread(vaddr_t epc, unsigned code, vaddr_t vaddr)
 		sig = SIGABRT;
 		break;
 	    case EX_MOD:
+		 #if OPT_A3
+ 	 	 sig = SIGSEGV;
+ 		 #endif
 	    case EX_TLBL:
 	    case EX_TLBS:
 		sig = SIGSEGV;
@@ -114,6 +117,8 @@ kill_curthread(vaddr_t epc, unsigned code, vaddr_t vaddr)
 	 * You will probably want to change this.
 	 */
 	 #if OPT_A3
+	 (void)epc;
+(void)vaddr;
 	 struct addrspace *as;
 	 struct proc *p = curproc;
 	 /* for now, just include this to keep the compiler from complaining about
