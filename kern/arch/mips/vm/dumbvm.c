@@ -165,9 +165,9 @@ free_kpages(vaddr_t addr)
 	#if OPT_A3
 	for(int i=0;i<coremap_size;++i){
 		if(coremap[i].addr==addr){
-			if(!coremap[i].used||coremap[i].num_of_frames==0){
-				panic("free_kpages:omething is wrong");
-			}
+			// if(!coremap[i].used||coremap[i].num_of_frames==0){
+			// 	panic("free_kpages:omething is wrong");
+			// }
 			for(int j=i;j<(int)(i+coremap[i].num_of_frames);++j){
 				coremap[j].used = false;
 				coremap[j].num_of_frames = 0;
