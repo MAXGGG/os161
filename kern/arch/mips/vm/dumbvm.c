@@ -128,6 +128,7 @@ getppages(unsigned long npages)
 	}
 	coremap[index].num_of_frames = npages;
 	spinlock_release(&stealmem_lock);
+	DEBUG(DB_VM, "final addr is %x \n",addr );
 
 	return addr;
 
