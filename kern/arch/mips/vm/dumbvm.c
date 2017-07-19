@@ -51,17 +51,84 @@
  * Wrap rma_stealmem in a spinlock.
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
+#if OPT_A3
+static coremap_frames **coremap;
+static int *coremap_size;
+static int bootstrapped = 0;
+#endif
 
 void
 vm_bootstrap(void)
 {
-	/* Do nothing. */
+#if OPT_A3
+	paddr_t *lo;
+	paddr_t *hi;
+	ram_getsize(lo,hi);
+	coremap_size = (hi-lo)/PAGE_SIZE;
+
+	coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
+	if(!coremap){
+		return ENOMEM;
+	}
+	//init core map and put it on lo
+	for(int i=0;i<coremap_size;++i){
+		struct coremap_frames* cf = kmalloc(sizeof(struct coremap_frames*));
+		if(!coremap_frames){
+			return ENOMEM;
+		}
+		cf->addr = lo + i*PAGE_SIZE;
+		cf->used = 0;
+		cf->num_of_frames = 0;
+		coremap[i] = cf;
+	}
+	bootstrapped = 1;
+#endif
 }
 
 static
 paddr_t
 getppages(unsigned long npages)
 {
+	#if OPT_A3
+	paddr_t addr;
+	if(!bootstrapped){
+		spinlock_acquire(&stealmem_lock);
+
+		addr = ram_stealmem(npages);
+
+		spinlock_release(&stealmem_lock);
+		return addr;
+	}
+	spinlock_acquire(&stealmem_lock);
+	unsigned long contiguous_frames = 0;
+	int index = 0;
+	for(int i=0;i<coremap_size;++i){
+		if(coremap[i]->used==0){
+			contiguous_frames++;
+			if(contiguous_frames==npages){
+				addr = coremap[i-npages+1]->addr;
+				index = i-npages+1;
+				break;
+			}else{
+				contiguous_frames = 0;
+			}
+		}
+	}
+
+	if(contiguous_frames!=npages){
+		return ENOMEM;
+	}
+
+	for(int i=index;i<(int)index+npages;++i){
+		coremap[i]->used = 1;
+	}
+	coremap[index]->num_of_frames = npages;
+	spinlock_release(&stealmem_lock);
+
+	return addr;
+
+
+	#else
 	paddr_t addr;
 
 	spinlock_acquire(&stealmem_lock);
@@ -70,6 +137,7 @@ getppages(unsigned long npages)
 
 	spinlock_release(&stealmem_lock);
 	return addr;
+	#endif
 }
 
 /* Allocate/free some kernel-space virtual pages */
@@ -87,9 +155,24 @@ alloc_kpages(int npages)
 void
 free_kpages(vaddr_t addr)
 {
+	#if OPT_A3
+	for(int i=0;i<coremap_size;++i){
+		if(coremap[i]->addr==addr){
+			if(coremap[i]->used==0||coremap[i]->num_of_frames==0){
+				panic("free_kpages:omething is wrong");
+			}
+			for(int j=i;j<i+coremap[i]->num_of_frames;++j){
+				coremap[j]->used = 0;
+				coremap[j]->num_of_frames = 0;
+			}
+			break;
+		}
+	}
+	#else
 	/* nothing - leak the memory. */
 
 	(void)addr;
+	#endif
 }
 
 void

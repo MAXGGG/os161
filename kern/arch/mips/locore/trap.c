@@ -122,7 +122,7 @@ kill_curthread(vaddr_t epc, unsigned code, vaddr_t vaddr)
 	 */
 	 #if OPT_A3
 	 (void)epc;
-(void)vaddr;
+	 (void)vaddr;
 	 struct addrspace *as;
 	 struct proc *p = curproc;
 	 /* for now, just include this to keep the compiler from complaining about
