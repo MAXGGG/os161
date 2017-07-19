@@ -52,7 +52,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 #if OPT_A3
-static struct coremap_frames **coremap;
+static struct coremap_frames *coremap;
 static int coremap_size;
 static int bootstrapped = 0;
 #endif
@@ -70,16 +70,16 @@ vm_bootstrap(void)
 
 	paddr_t lo_for_frames = lo + coremap_size * sizeof(struct coremap_frames*);
 	coremap_size = (hi-lo_for_frames)/PAGE_SIZE;
-	coremap = (struct coremap_frames **)PADDR_TO_KVADDR(lo);
+	coremap = (struct coremap_frames *)PADDR_TO_KVADDR(lo);
 	for(int i=0;i<coremap_size;++i){
-		coremap[i]->addr = lo_for_frames;
+		coremap[i].addr = lo_for_frames;
 		lo_for_frames+=PAGE_SIZE;
 		// cf->addr = lo + i*PAGE_SIZE;
 		// cf->used = 0;
 		// cf->num_of_frames = 0;
 		// coremap[i] = cf;
-		coremap[i]->used = 0;
-		coremap[i]->num_of_frames = 0;
+		coremap[i].used = 0;
+		coremap[i].num_of_frames = 0;
 	}
 	bootstrapped = 1;
 #endif
@@ -103,10 +103,10 @@ getppages(unsigned long npages)
 	unsigned long contiguous_frames = 0;
 	int index = 0;
 	for(int i=0;i<coremap_size;++i){
-		if(coremap[i]->used==0){
+		if(coremap[i].used==0){
 			contiguous_frames++;
 			if(contiguous_frames==npages){
-				addr = coremap[i-npages+1]->addr;
+				addr = coremap[i-npages+1].addr;
 				index = i-npages+1;
 				break;
 			}else{
@@ -120,9 +120,9 @@ getppages(unsigned long npages)
 	}
 
 	for(int i=index;i<(int)(index+npages);++i){
-		coremap[i]->used = 1;
+		coremap[i].used = 1;
 	}
-	coremap[index]->num_of_frames = npages;
+	coremap[index].num_of_frames = npages;
 	spinlock_release(&stealmem_lock);
 
 	return addr;
@@ -157,13 +157,13 @@ free_kpages(vaddr_t addr)
 {
 	#if OPT_A3
 	for(int i=0;i<coremap_size;++i){
-		if(coremap[i]->addr==addr){
-			if(coremap[i]->used==0||coremap[i]->num_of_frames==0){
+		if(coremap[i].addr==addr){
+			if(coremap[i].used==0||coremap[i].num_of_frames==0){
 				panic("free_kpages:omething is wrong");
 			}
-			for(int j=i;j<(int)(i+coremap[i]->num_of_frames);++j){
-				coremap[j]->used = 0;
-				coremap[j]->num_of_frames = 0;
+			for(int j=i;j<(int)(i+coremap[i].num_of_frames);++j){
+				coremap[j].used = 0;
+				coremap[j].num_of_frames = 0;
 			}
 			break;
 		}
