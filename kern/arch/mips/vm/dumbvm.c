@@ -69,7 +69,8 @@ vm_bootstrap(void)
 	// coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
 
 	paddr_t lo_for_frames = lo + coremap_size * sizeof(struct coremap_frames*);
-	lo_for_frames+=lo_for_frames%PAGE_SIZE ;
+	lo_for_frames+=PAGE_SIZE-lo_for_frames%PAGE_SIZE ;
+
 	coremap_size = (hi-lo_for_frames)/PAGE_SIZE;
 	coremap = (struct coremap_frames *)PADDR_TO_KVADDR(lo);
 	for(int i=0;i<coremap_size;++i){
