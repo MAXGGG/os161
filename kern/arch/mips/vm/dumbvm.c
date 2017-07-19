@@ -61,20 +61,20 @@ void
 vm_bootstrap(void)
 {
 #if OPT_A3
-	paddr_t *lo;
-	paddr_t *hi;
-	ram_getsize(lo,hi);
+	paddr_t lo;
+	paddr_t hi;
+	ram_getsize(&lo,&hi);
 	coremap_size = (hi-lo)/PAGE_SIZE;
 
 	coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
 	if(!coremap){
-		return ENOMEM;
+		panic("no enough memory");
 	}
 	//init core map and put it on lo
 	for(int i=0;i<coremap_size;++i){
 		struct coremap_frames* cf = kmalloc(sizeof(struct coremap_frames*));
-		if(!coremap_frames){
-			return ENOMEM;
+		if(!cf){
+			panic("no enough memory");
 		}
 		cf->addr = lo + i*PAGE_SIZE;
 		cf->used = 0;
