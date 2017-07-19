@@ -363,7 +363,7 @@ int
 as_complete_load(struct addrspace *as)
 {
 	#if OPT_A3
-	load_elf_finished = 1;
+	as->load_elf_finished = 1;
 	#else
 	(void)as;
 	#endif
