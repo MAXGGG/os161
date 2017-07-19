@@ -52,8 +52,8 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 #if OPT_A3
-static coremap_frames **coremap;
-static int *coremap_size;
+static struct coremap_frames **coremap;
+static int coremap_size;
 static int bootstrapped = 0;
 #endif
 
