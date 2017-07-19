@@ -49,7 +49,7 @@
 struct coremap_frames {
    paddr_t addr;
    unsigned long num_of_frames;
-   int used;
+   bool used;
 };
 
 #endif

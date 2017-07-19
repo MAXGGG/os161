@@ -80,7 +80,7 @@ vm_bootstrap(void)
 		// cf->used = 0;
 		// cf->num_of_frames = 0;
 		// coremap[i] = cf;
-		coremap[i].used = 0;
+		coremap[i].used = false;
 		coremap[i].num_of_frames = 0;
 	}
 	bootstrapped = 1;
@@ -106,7 +106,7 @@ getppages(unsigned long npages)
 	int enough = 0;
 	for(int i=0;i<coremap_size;++i){
 		DEBUG(DB_VM, "coremap is  %d \n",coremap[i].used);
-		if(coremap[i].used==0){
+		if(!coremap[i].used){
 			contiguous_frames++;
 			DEBUG(DB_VM, "frame count is %d \n",(int)contiguous_frames );
 			if(contiguous_frames==npages){
@@ -126,7 +126,7 @@ getppages(unsigned long npages)
 	}
 
 	for(int i=index;i<(int)(index+npages);++i){
-		coremap[i].used = 1;
+		coremap[i].used = true;
 	}
 	coremap[index].num_of_frames = npages;
 	spinlock_release(&stealmem_lock);
@@ -165,11 +165,11 @@ free_kpages(vaddr_t addr)
 	#if OPT_A3
 	for(int i=0;i<coremap_size;++i){
 		if(coremap[i].addr==addr){
-			if(coremap[i].used==0||coremap[i].num_of_frames==0){
+			if(!coremap[i].used||coremap[i].num_of_frames==0){
 				panic("free_kpages:omething is wrong");
 			}
 			for(int j=i;j<(int)(i+coremap[i].num_of_frames);++j){
-				coremap[j].used = 0;
+				coremap[j].used = false;
 				coremap[j].num_of_frames = 0;
 			}
 			break;
