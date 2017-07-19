@@ -90,16 +90,15 @@ paddr_t
 getppages(unsigned long npages)
 {
 	#if OPT_A3
+	spinlock_acquire(&stealmem_lock);
 	paddr_t addr;
 	if(!bootstrapped){
-		spinlock_acquire(&stealmem_lock);
 
 		addr = ram_stealmem(npages);
 
-		spinlock_release(&stealmem_lock);
+		// spinlock_release(&stealmem_lock);
 		return addr;
-	}
-	spinlock_acquire(&stealmem_lock);
+	};
 	unsigned long contiguous_frames = 0;
 	int index = 0;
 	for(int i=0;i<coremap_size;++i){
