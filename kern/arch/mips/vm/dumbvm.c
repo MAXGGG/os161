@@ -106,7 +106,7 @@ getppages(unsigned long npages)
 		DEBUG(DB_VM, "coremap is  %d \n",coremap[i].used);
 		if(coremap[i].used==0){
 			contiguous_frames++;
-			DEBUG(DB_VM, "frame count is %d \n",contiguous_frames );
+			DEBUG(DB_VM, "frame count is %d \n",(int)contiguous_frames );
 			if(contiguous_frames==npages){
 				enough = 1;
 				addr = coremap[i-npages+1].addr;
