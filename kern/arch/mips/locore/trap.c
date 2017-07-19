@@ -35,6 +35,8 @@
 #include <cpu.h>
 #include <spl.h>
 #include <thread.h>
+#include <synch.h>
+#include <addrspace.h>
 #include <current.h>
 #include <vm.h>
 #include <proc.h>
