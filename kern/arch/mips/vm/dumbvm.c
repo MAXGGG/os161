@@ -119,7 +119,7 @@ getppages(unsigned long npages)
 		return ENOMEM;
 	}
 
-	for(int i=index;i<(int)index+npages;++i){
+	for(int i=index;i<(int)(index+npages);++i){
 		coremap[i]->used = 1;
 	}
 	coremap[index]->num_of_frames = npages;
@@ -161,7 +161,7 @@ free_kpages(vaddr_t addr)
 			if(coremap[i]->used==0||coremap[i]->num_of_frames==0){
 				panic("free_kpages:omething is wrong");
 			}
-			for(int j=i;j<i+coremap[i]->num_of_frames;++j){
+			for(int j=i;j<(int)(i+coremap[i]->num_of_frames);++j){
 				coremap[j]->used = 0;
 				coremap[j]->num_of_frames = 0;
 			}
