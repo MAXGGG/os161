@@ -101,10 +101,12 @@ getppages(unsigned long npages)
 	};
 	unsigned long contiguous_frames = 0;
 	int index = 0;
+	int enough = 0;
 	for(int i=0;i<coremap_size;++i){
 		if(coremap[i].used==0){
 			contiguous_frames++;
 			if(contiguous_frames==npages){
+				enough = 1;
 				addr = coremap[i-npages+1].addr;
 				index = i-npages+1;
 				break;
@@ -114,7 +116,7 @@ getppages(unsigned long npages)
 		}
 	}
 
-	if(contiguous_frames!=npages){
+	if(!enough){
 		spinlock_release(&stealmem_lock);
 		panic("no enough memory");
 	}
