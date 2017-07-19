@@ -37,6 +37,7 @@
 #include <thread.h>
 #include <synch.h>
 #include <addrspace.h>
+#include <kern/wait.h>
 #include <current.h>
 #include <vm.h>
 #include <proc.h>
