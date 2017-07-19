@@ -96,7 +96,7 @@ getppages(unsigned long npages)
 
 		addr = ram_stealmem(npages);
 
-		// spinlock_release(&stealmem_lock);
+		spinlock_release(&stealmem_lock);
 		return addr;
 	};
 	unsigned long contiguous_frames = 0;
