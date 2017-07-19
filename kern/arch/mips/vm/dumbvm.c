@@ -67,15 +67,15 @@ vm_bootstrap(void)
 	coremap_size = (hi-lo)/PAGE_SIZE;
 
 	coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
-	if(!coremap){
-		panic("no enough memory");
-	}
+	// if(!coremap){
+	// 	panic("no enough memory");
+	// }
 	//init core map and put it on lo
 	for(int i=0;i<coremap_size;++i){
 		struct coremap_frames* cf = kmalloc(sizeof(struct coremap_frames*));
-		if(!cf){
-			panic("no enough memory");
-		}
+		// if(!cf){
+		// 	panic("no enough memory");
+		// }
 		cf->addr = lo + i*PAGE_SIZE;
 		cf->used = 0;
 		cf->num_of_frames = 0;
