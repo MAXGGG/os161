@@ -37,6 +37,7 @@
 #include <thread.h>
 #include <current.h>
 #include <vm.h>
+#include <proc.h>
 #include <mainbus.h>
 #include <syscall.h>
 #include "opt-A2.h"
