@@ -122,7 +122,11 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	switch (faulttype) {
 	    case VM_FAULT_READONLY:
 		/* We always create pages read-write, so we can't get this */
+		#if OPT_A3
+		return 1;
+		#else
 		panic("dumbvm: got VM_FAULT_READONLY\n");
+		#endif
 	    case VM_FAULT_READ:
 	    case VM_FAULT_WRITE:
 		break;
@@ -195,6 +199,11 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 		}
 		ehi = faultaddress;
 		elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
+		#if OPT_A3
+		if(as->load_elf_finished==1){
+			elo&=~TLBLO_DIRTY;
+		}
+		#endif
 		DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 		tlb_write(ehi, elo, i);
 		splx(spl);
@@ -203,6 +212,9 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	#if OPT_A3
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
+	if(as->load_elf_finished==1){
+		elo&=~TLBLO_DIRTY;
+	}
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 	tlb_random(ehi, elo);
 	splx(spl);
@@ -221,6 +233,9 @@ as_create(void)
 	if (as==NULL) {
 		return NULL;
 	}
+	#if OPT_A3
+	as->load_elf_finished = 0;
+	#endif
 
 	as->as_vbase1 = 0;
 	as->as_pbase1 = 0;
@@ -347,7 +362,11 @@ as_prepare_load(struct addrspace *as)
 int
 as_complete_load(struct addrspace *as)
 {
+	#if OPT_A3
+	load_elf_finished = 1;
+	#else
 	(void)as;
+	#endif
 	return 0;
 }
 
