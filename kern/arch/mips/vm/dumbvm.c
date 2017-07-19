@@ -66,20 +66,20 @@ vm_bootstrap(void)
 	ram_getsize(&lo,&hi);
 	coremap_size = (hi-lo)/PAGE_SIZE;
 
-	coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
-	// if(!coremap){
-	// 	panic("no enough memory");
-	// }
-	//init core map and put it on lo
+	// coremap = kmalloc(sizeof(struct coremap_frames*)*coremap_size);
+
+	paddr_t lo_for_frames = lo + coremap_size * sizeof(struct coremap_frames*);
+	coremap_size = (hi-lo_for_frames)/PAGE_SIZE;
+	coremap = (struct coremap_frames *)PADDR_TO_KVADDR(lo);
 	for(int i=0;i<coremap_size;++i){
-		struct coremap_frames* cf = kmalloc(sizeof(struct coremap_frames*));
-		// if(!cf){
-		// 	panic("no enough memory");
-		// }
-		cf->addr = lo + i*PAGE_SIZE;
-		cf->used = 0;
-		cf->num_of_frames = 0;
-		coremap[i] = cf;
+		coremap[i]->addr = lo_for_frames;
+		lo_for_frames+=PAGE_SIZE;
+		// cf->addr = lo + i*PAGE_SIZE;
+		// cf->used = 0;
+		// cf->num_of_frames = 0;
+		// coremap[i] = cf;
+		coremap[i]->used = 0;
+		coremap[i]->num_of_frames = 0;
 	}
 	bootstrapped = 1;
 #endif
