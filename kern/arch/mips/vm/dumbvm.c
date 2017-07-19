@@ -112,9 +112,9 @@ getppages(unsigned long npages)
 				addr = coremap[i-npages+1].addr;
 				index = i-npages+1;
 				break;
-			}else{
-				contiguous_frames = 0;
 			}
+		}else{
+			contiguous_frames = 0;
 		}
 	}
 
